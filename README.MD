@@ -59,13 +59,13 @@ cargo test
   - <img style="width: 450px" src="./p4_models_animation_gpu_skinning/image.png" />
 - p5 - animation timing
   - <img style="width: 450px" src="./p5_models_animation_timing/image.png" />
+- p6 - simple voxel
+  - <img style="width: 450px" src="./p6_models_basic_voxel/image.png" />
 
 ## References
 
 1. <https://stackoverflow.com/questions/63305865/makefile-create-a-build-directory>
-1. <https://www.youtube.com/watch?v=z7wVUfnm7M0>
 1. Git submodules: <https://www.w3schools.com/git/git_submodules.asp>
 1. <https://github.com/raysan5/raylib/wiki/Working-with-CMake>
-1. <https://free3d.com/>
 1. glb viewer: <https://sandbox.babylonjs.com/>
 1. <https://github.com/raysan5/raygui>
