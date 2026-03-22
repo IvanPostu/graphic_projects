@@ -2,6 +2,8 @@
 
 Small projects and experiments for testing ideas and building quick POCs.
 
+- p1..p30 - play with **raylib** examples from: <https://github.com/raysan5/raylib/tree/master/examples>
+
 ## Shell
 
 ```sh
@@ -26,12 +28,12 @@ cmake -B build && cmake --build build
 cd p1_load_obj
 make opt=0 # 0=debug, 1=release
 
-cd $PROJECT_ROOT/p2_models_animation_blend_custom/build
+cd $PROJECT_ROOT/p1_load_obj/build
 
 ./main.out
 ```
 
-## Rust setup + run
+## Rust setup + run (isn't used yet)
 
 ```sh
 rustup default stable
@@ -45,24 +47,18 @@ cargo run --bin=dsa_rust --package=dsa_rust
 cargo test
 ```
 
-## C language setup + run
+## Overview
 
-```sh
-# VSCodium + clangd(LSP) + codeLLB(debugger)
-# add clang-tools as a nix dependency
-
-# C project
-cd dsa_c
-make clean # clean dsa_c/build folder
-make opt=0 # debug build
-make opt=1 # release build
-make run
-
-# debugger usage: 
-# call compact_8b_bool_to_char_bits(actual)
-# print a
-# print a ? b
-```
+- p1 - load obj file with png texture and render it
+  - <img style="width: 450px" src="./p1_load_obj/image.png" />
+- p2 - transition between two animations using per-bone animation blending
+  - <img style="width: 450px" src="./p2_models_animation_blend_custom/image.png" />
+- p3 - animation blending (transition between animations)
+  - <img style="width: 450px" src="./p3_models_animation_blending/image.png" />
+- p4 - GPU skinning
+  - <img style="width: 450px" src="./p4_models_animation_gpu_skinning/image.png" />
+- p5 - animation timing
+  - <img style="width: 450px" src="./p5_models_animation_timing/image.png" />
 
 ## References
 
