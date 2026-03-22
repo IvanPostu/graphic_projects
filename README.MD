@@ -8,6 +8,23 @@ Small projects and experiments for testing ideas and building quick POCs.
 nix-shell --run bash
 ```
 
+## Prerequisites
+
+```sh
+# Setup external dependencies
+git submodule init
+git submodule update
+```
+
+## Build and Run
+
+```sh
+# Build p1
+cd p1_load_obj
+make opt=0 # 0=debug, 1=release
+make run
+```
+
 ## Rust setup + run
 
 ```sh
@@ -43,5 +60,7 @@ make run
 
 ## References
 
-- <https://stackoverflow.com/questions/63305865/makefile-create-a-build-directory>
-- <https://www.youtube.com/watch?v=z7wVUfnm7M0>
+1. <https://stackoverflow.com/questions/63305865/makefile-create-a-build-directory>
+1. <https://www.youtube.com/watch?v=z7wVUfnm7M0>
+1. Git submodules: <https://www.w3schools.com/git/git_submodules.asp>
+1. <https://github.com/raysan5/raylib/wiki/Working-with-CMake>
