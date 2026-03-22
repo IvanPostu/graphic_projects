@@ -9,11 +9,13 @@
 #include <stdlib.h> // Required for: NULL
 #include <string.h> // Required for: memcpy()
 
-#if defined(PLATFORM_DESKTOP)
-#define GLSL_VERSION 330
-#else // PLATFORM_ANDROID, PLATFORM_WEB
+// #if defined(PLATFORM_DESKTOP)
+// #define GLSL_VERSION 330
+// #else // PLATFORM_ANDROID, PLATFORM_WEB
+// #define GLSL_VERSION 100
+// #endif
+
 #define GLSL_VERSION 100
-#endif
 
 //------------------------------------------------------------------------------------
 // Module Functions Declaration
