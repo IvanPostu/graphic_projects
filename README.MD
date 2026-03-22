@@ -61,6 +61,9 @@ cargo test
   - <img style="width: 450px" src="./p5_models_animation_timing/image.png" />
 - p6 - simple voxel
   - <img style="width: 450px" src="./p6_models_basic_voxel/image.png" />
+- p7 - billboard - logic that decides what is on front/back
+  - <img style="width: 450px" src="./p7_models_billboard_rendering/image.png" />
+  - <img style="width: 450px" src="./p7_models_billboard_rendering/image copy.png" />
 
 ## References
 
