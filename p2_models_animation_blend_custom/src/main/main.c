@@ -46,7 +46,7 @@ int main(void) {
   camera.projection = CAMERA_PERSPECTIVE; // Camera projection type
 
   // Load gltf model
-  Model model = LoadModel("resources/gltf/greenman.glb");
+  Model model = LoadModel("resources/gltf/greenman2.glb");
   Vector3 position = {0.0f, 0.0f, 0.0f}; // Set model position
 
   printf("GLSL_VERSION=%d\n", GLSL_VERSION);
@@ -62,7 +62,7 @@ int main(void) {
   // Load gltf model animations
   int animCount = 0;
   ModelAnimation *anims =
-      LoadModelAnimations("resources/gltf/greenman.glb", &animCount);
+      LoadModelAnimations("resources/gltf/greenman2.glb", &animCount);
 
   // Use specific animation indices: 2-walk/move, 3-attack
   int animIndex0 = 2; // Walk/Move animation (index 2)

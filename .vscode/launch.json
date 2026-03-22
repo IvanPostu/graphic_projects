@@ -18,10 +18,10 @@
             "args": []
         },
         {
-            "name": "Debug 'dsa_c'",
+            "name": "Debug 'p2_models_animation_blend_custom'",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/dsa_c/build/main.out",
+            "program": "${workspaceFolder}/p2_models_animation_blend_custom/build/main.out",
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopOnEntry": false

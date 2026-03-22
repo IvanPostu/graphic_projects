@@ -25,7 +25,10 @@ cmake -B build && cmake --build build
 # Build p1
 cd p1_load_obj
 make opt=0 # 0=debug, 1=release
-make run
+
+cd $PROJECT_ROOT/p2_models_animation_blend_custom/build
+
+./main.out
 ```
 
 ## Rust setup + run
