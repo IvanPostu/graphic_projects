@@ -2,58 +2,40 @@
 
 #define MAX_BONE_NUM 64
 
-// Input vertex attributes
 attribute vec3 vertexPosition;
 attribute vec2 vertexTexCoord;
 attribute vec4 vertexColor;
 attribute vec4 vertexBoneIndices;
 attribute vec4 vertexBoneWeights;
 
-// Input uniform values
 uniform mat4 mvp;
 uniform mat4 boneMatrices[MAX_BONE_NUM];
 
-// Output vertex attributes (to fragment shader)
 varying vec2 fragTexCoord;
 varying vec4 fragColor;
 
 void main()
 {
-    int boneIndex0 = int(vertexBoneIndices.x);
-    int boneIndex1 = int(vertexBoneIndices.y);
-    int boneIndex2 = int(vertexBoneIndices.z);
-    int boneIndex3 = int(vertexBoneIndices.w);
-    
-    // WARNING: OpenGL ES 2.0 does not support automatic matrix transposing, neither transpose() function
-    mat4 boneMatrixTransposed0 = mat4(
-        vec4(boneMatrices[boneIndex0][0].x, boneMatrices[boneIndex0][1].x, boneMatrices[boneIndex0][2].x, boneMatrices[boneIndex0][3].x),
-        vec4(boneMatrices[boneIndex0][0].y, boneMatrices[boneIndex0][1].y, boneMatrices[boneIndex0][2].y, boneMatrices[boneIndex0][3].y),
-        vec4(boneMatrices[boneIndex0][0].z, boneMatrices[boneIndex0][1].z, boneMatrices[boneIndex0][2].z, boneMatrices[boneIndex0][3].z),
-        vec4(boneMatrices[boneIndex0][0].w, boneMatrices[boneIndex0][1].w, boneMatrices[boneIndex0][2].w, boneMatrices[boneIndex0][3].w));
-    mat4 boneMatrixTransposed1 = mat4(
-        vec4(boneMatrices[boneIndex1][0].x, boneMatrices[boneIndex1][1].x, boneMatrices[boneIndex1][2].x, boneMatrices[boneIndex1][3].x),
-        vec4(boneMatrices[boneIndex1][0].y, boneMatrices[boneIndex1][1].y, boneMatrices[boneIndex1][2].y, boneMatrices[boneIndex1][3].y),
-        vec4(boneMatrices[boneIndex1][0].z, boneMatrices[boneIndex1][1].z, boneMatrices[boneIndex1][2].z, boneMatrices[boneIndex1][3].z),
-        vec4(boneMatrices[boneIndex1][0].w, boneMatrices[boneIndex1][1].w, boneMatrices[boneIndex1][2].w, boneMatrices[boneIndex1][3].w));
-    mat4 boneMatrixTransposed2 = mat4(
-        vec4(boneMatrices[boneIndex2][0].x, boneMatrices[boneIndex2][1].x, boneMatrices[boneIndex2][2].x, boneMatrices[boneIndex2][3].x),
-        vec4(boneMatrices[boneIndex2][0].y, boneMatrices[boneIndex2][1].y, boneMatrices[boneIndex2][2].y, boneMatrices[boneIndex2][3].y),
-        vec4(boneMatrices[boneIndex2][0].z, boneMatrices[boneIndex2][1].z, boneMatrices[boneIndex2][2].z, boneMatrices[boneIndex2][3].z),
-        vec4(boneMatrices[boneIndex2][0].w, boneMatrices[boneIndex2][1].w, boneMatrices[boneIndex2][2].w, boneMatrices[boneIndex2][3].w));
-    mat4 boneMatrixTransposed3 = mat4(
-        vec4(boneMatrices[boneIndex3][0].x, boneMatrices[boneIndex3][1].x, boneMatrices[boneIndex3][2].x, boneMatrices[boneIndex3][3].x),
-        vec4(boneMatrices[boneIndex3][0].y, boneMatrices[boneIndex3][1].y, boneMatrices[boneIndex3][2].y, boneMatrices[boneIndex3][3].y),
-        vec4(boneMatrices[boneIndex3][0].z, boneMatrices[boneIndex3][1].z, boneMatrices[boneIndex3][2].z, boneMatrices[boneIndex3][3].z),
-        vec4(boneMatrices[boneIndex3][0].w, boneMatrices[boneIndex3][1].w, boneMatrices[boneIndex3][2].w, boneMatrices[boneIndex3][3].w));
-    
+    vec4 pos = vec4(vertexPosition, 1.0);
+
+    int i0 = int(vertexBoneIndices.x);
+    int i1 = int(vertexBoneIndices.y);
+    int i2 = int(vertexBoneIndices.z);
+    int i3 = int(vertexBoneIndices.w);
+
+    float w0 = vertexBoneWeights.x;
+    float w1 = vertexBoneWeights.y;
+    float w2 = vertexBoneWeights.z;
+    float w3 = vertexBoneWeights.w;
+
     vec4 skinnedPosition =
-        vertexBoneWeights.x*(boneMatrixTransposed0*vec4(vertexPosition, 1.0)) +
-        vertexBoneWeights.y*(boneMatrixTransposed1*vec4(vertexPosition, 1.0)) + 
-        vertexBoneWeights.z*(boneMatrixTransposed2*vec4(vertexPosition, 1.0)) + 
-        vertexBoneWeights.w*(boneMatrixTransposed3*vec4(vertexPosition, 1.0));
-    
+          w0 * (boneMatrices[i0] * pos)
+        + w1 * (boneMatrices[i1] * pos)
+        + w2 * (boneMatrices[i2] * pos)
+        + w3 * (boneMatrices[i3] * pos);
+
     fragTexCoord = vertexTexCoord;
     fragColor = vertexColor;
 
-    gl_Position = mvp*skinnedPosition;
+    gl_Position = mvp * skinnedPosition;
 }

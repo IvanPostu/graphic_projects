@@ -15,7 +15,7 @@
 // #define GLSL_VERSION 100
 // #endif
 
-#define GLSL_VERSION 100
+#define GLSL_VERSION 101
 
 //------------------------------------------------------------------------------------
 // Module Functions Declaration
