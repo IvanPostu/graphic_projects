@@ -70,6 +70,8 @@ cargo test
   - <img style="width: 450px" src="./p9_models_box_collisions/image.png" />
 - p10 - cubic map
   - <img style="width: 450px" src="./p10_models_cubicmap_rendering/image.png" />
+- p11 - models decals
+  - <img style="width: 450px" src="./p11_models_decals/image.png" />
 
 ## References
 
