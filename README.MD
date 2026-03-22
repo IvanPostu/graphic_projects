@@ -68,6 +68,8 @@ cargo test
   - <img style="width: 450px" src="./p8_models_bone_socket/image.png" />
 - p9 - collision detection
   - <img style="width: 450px" src="./p9_models_box_collisions/image.png" />
+- p10 - cubic map
+  - <img style="width: 450px" src="./p10_models_cubicmap_rendering/image.png" />
 
 ## References
 
