@@ -18,12 +18,12 @@
             "args": []
         },
         {
-            "name": "Debug 'p2_models_animation_blend_custom'",
+            "name": "Debug 'p4_models_animation_gpu_skinning'",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/p2_models_animation_blend_custom/build/main.out",
+            "program": "${workspaceFolder}/p4_models_animation_gpu_skinning/build/main.out",
             "args": [],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/p4_models_animation_gpu_skinning/build",
             "stopOnEntry": false
         }
     ]
