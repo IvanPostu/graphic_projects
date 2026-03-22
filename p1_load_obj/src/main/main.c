@@ -2,23 +2,21 @@
 #include <rcamera.h>
 #include <stdio.h>
 
-#define model_path                                                             \
-  "Skull_v3_original/"      \
-  "12140_Skull_v3_L2.obj"
-#define texture_path                                                           \
-  "Skull_v3_original/"      \
-  "Skull.jpg"
+#define model_path "resources/plane/plane.obj"
+#define texture_path "resources/plane/plane_diffuse.png"
 
 int main() {
   SetTraceLogLevel(LOG_ALL);
   InitWindow(1280, 720, "Model Loading");
 
   Model model = LoadModel(model_path);
-  // Texture2D tex = LoadTexture(texture_path);
+  Image image = LoadImage(texture_path);
+  Texture2D texture = LoadTextureFromImage(image);
+  UnloadImage(image);
   printf("Material count=%d\n", model.materialCount);
-  // for (int i = 0; i < model.materialCount; i++) {
-  //   model.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = tex;
-  // }
+  for (int i = 0; i < model.materialCount; i++) {
+    model.materials[i].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+  }
 
   Camera cam = {0};
   cam.position = (Vector3){50.0f, 50.0f, 50.0f};
@@ -48,7 +46,7 @@ int main() {
     EndDrawing();
   }
 
-  // UnloadTexture(tex);
+  UnloadTexture(texture);
   UnloadModel(model);
   CloseWindow();
   return 0;
