@@ -33,5 +33,8 @@ pkgs.mkShell {
 
       export C_INCLUDE_PATH=$PROJECT_ROOT/external/raylib/build/raylib/include:$C_INCLUDE_PATH
       export CPLUS_INCLUDE_PATH=$PROJECT_ROOT/external/raylib/build/raylib/include:$CPLUS_INCLUDE_PATH
+
+      export C_INCLUDE_PATH=$PROJECT_ROOT/external/raygui/src:$C_INCLUDE_PATH
+      export CPLUS_INCLUDE_PATH=$PROJECT_ROOT/external/raygui/src:$CPLUS_INCLUDE_PATH
   '';
 }
