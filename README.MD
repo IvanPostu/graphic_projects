@@ -14,6 +14,9 @@ nix-shell --run bash
 # Setup external dependencies
 git submodule init
 git submodule update
+
+cd external/raylib
+cmake -B build && cmake --build build
 ```
 
 ## Build and Run
@@ -64,3 +67,4 @@ make run
 1. <https://www.youtube.com/watch?v=z7wVUfnm7M0>
 1. Git submodules: <https://www.w3schools.com/git/git_submodules.asp>
 1. <https://github.com/raysan5/raylib/wiki/Working-with-CMake>
+1. <https://free3d.com/>

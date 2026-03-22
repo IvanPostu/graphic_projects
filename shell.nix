@@ -19,16 +19,19 @@ pkgs.mkShell {
     libxinerama # needed to build raylib
     libxcursor # needed to build raylib
     libxi # needed to build raylib
+    glfw
   ];
 
   LANG = "en_US.UTF-8";
   LC_ALL = "en_US.UTF-8";
 
   shellHook = ''
-        export QQQ=${pkgs.clang-tools}
-        export PROJECT_ROOT="${PROJECT_ROOT}"
-        export RUSTUP_HOME="$PROJECT_ROOT/.rustup"
-        export CARGO_HOME="$PROJECT_ROOT/.cargo"
-        export PATH="$CARGO_HOME/bin:$PATH"
+      export PROJECT_ROOT="${PROJECT_ROOT}"
+      export RUSTUP_HOME="$PROJECT_ROOT/.rustup"
+      export CARGO_HOME="$PROJECT_ROOT/.cargo"
+      export PATH="$CARGO_HOME/bin:$PATH"
+
+      export C_INCLUDE_PATH=$PROJECT_ROOT/external/raylib/build/raylib/include:$C_INCLUDE_PATH
+      export CPLUS_INCLUDE_PATH=$PROJECT_ROOT/external/raylib/build/raylib/include:$CPLUS_INCLUDE_PATH
   '';
 }

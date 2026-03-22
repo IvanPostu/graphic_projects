@@ -1,6 +1,8 @@
 opt=0
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -I$(PROJECT_ROOT)/external/raylib/build/raylib/include
+# LDFLAGS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+LDFLAGS = -L$(PROJECT_ROOT)/external/raylib/build/raylib -lraylib -lglfw -lGL -lm -lpthread -ldl -lrt -lX11
 BUILD_DIR=build
 TARGETS=print_opt $(BUILD_DIR) $(BUILD_DIR)/main/main.o build_executable
 
@@ -21,7 +23,7 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 build_executable:
-	$(CC) $(CFLAGS) $(BUILD_DIR)/main/main.o -o $(BUILD_DIR)/main.out
+	$(CC) $(CFLAGS) $(BUILD_DIR)/main/main.o -o $(BUILD_DIR)/main.out $(LDFLAGS)
 
 print_opt:
 	@echo "Current opt value is: $(opt)"
