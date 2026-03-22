@@ -66,6 +66,8 @@ cargo test
   - <img style="width: 450px" src="./p7_models_billboard_rendering/image copy.png" />
 - p8 - model + animation + bone socket (model + external things like weapon or shield)
   - <img style="width: 450px" src="./p8_models_bone_socket/image.png" />
+- p9 - collision detection
+  - <img style="width: 450px" src="./p9_models_box_collisions/image.png" />
 
 ## References
 
