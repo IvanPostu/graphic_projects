@@ -74,6 +74,8 @@ cargo test
   - <img style="width: 450px" src="./p11_models_decals/image.png" />
 - p12 - directional billboard
   - <img style="width: 450px" src="./p12_models_directional_billboard/image.png" />
+- p13 - first person maze
+  - <img style="width: 450px" src="./p13_models_first_person_maze/image.png" />
 
 ## References
 
