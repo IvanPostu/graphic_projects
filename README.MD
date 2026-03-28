@@ -76,6 +76,12 @@ cargo test
   - <img style="width: 450px" src="./p12_models_directional_billboard/image.png" />
 - p13 - first person maze
   - <img style="width: 450px" src="./p13_models_first_person_maze/image.png" />
+- p14 - geometric shapes
+  - <img style="width: 450px" src="./p14_models_geometric_shapes/image.png" />
+- p15 - height map rendering
+  - <img style="width: 450px" src="./p15_models_heightmap_rendering/image.png" />
+- p16 - model loading + animations
+  - <img style="width: 450px" src="./p16_models_loading_gltf/image.png" />
 
 ## References
 
