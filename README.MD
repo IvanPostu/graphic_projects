@@ -82,6 +82,8 @@ cargo test
   - <img style="width: 450px" src="./p15_models_heightmap_rendering/image.png" />
 - p16 - model loading + animations
   - <img style="width: 450px" src="./p16_models_loading_gltf/image.png" />
+- p17 - 3d terrain movement
+  - <img style="width: 450px" src="./p17_3d_terrain_movement/image.png" />
 
 ## References
 
@@ -90,3 +92,4 @@ cargo test
 1. <https://github.com/raysan5/raylib/wiki/Working-with-CMake>
 1. glb viewer: <https://sandbox.babylonjs.com/>
 1. <https://github.com/raysan5/raygui>
+1. <https://github.com/misabitencourt/3d-terrain-movement>
