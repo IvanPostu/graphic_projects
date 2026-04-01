@@ -12,6 +12,7 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     rustup
     gcc14
+    binutils # provides gprof
     clang-tools
     cmake
     libx11 # needed to build raylib

@@ -19,6 +19,9 @@ git submodule update
 
 cd external/raylib
 cmake -B build && cmake --build build
+
+make -f ./p18_minecraft_cpp/Makefile print
+make -f ./p18_minecraft_cpp/Makefile buildAndRun
 ```
 
 ## Build and Run
@@ -84,6 +87,8 @@ cargo test
   - <img style="width: 450px" src="./p16_models_loading_gltf/image.png" />
 - p17 - 3d terrain movement
   - <img style="width: 450px" src="./p17_3d_terrain_movement/image.png" />
+- p18 - minecraft (see reference)
+  - <img style="width: 450px" src="./p18_minecraft_cpp/image.png" />
 
 ## References
 
@@ -93,3 +98,4 @@ cargo test
 1. glb viewer: <https://sandbox.babylonjs.com/>
 1. <https://github.com/raysan5/raygui>
 1. <https://github.com/misabitencourt/3d-terrain-movement>
+1. <https://github.com/LelsersLasers/Minecraft/tree/main>

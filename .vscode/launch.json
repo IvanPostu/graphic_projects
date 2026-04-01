@@ -25,6 +25,15 @@
             "args": [],
             "cwd": "${workspaceFolder}/p4_models_animation_gpu_skinning/build",
             "stopOnEntry": false
+        },
+        {
+            "name": "Debug 'p18_minecraft_cpp'",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/p18_minecraft_cpp/build/main",
+            "args": [],
+            "cwd": "${workspaceFolder}/p18_minecraft_cpp/build",
+            "stopOnEntry": false
         }
     ]
 }
