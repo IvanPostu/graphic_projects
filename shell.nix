@@ -10,6 +10,7 @@ pkgs.mkShell {
   ];
 
   buildInputs = with pkgs; [
+    cmake
     rustup
     gcc14
     binutils # provides gprof

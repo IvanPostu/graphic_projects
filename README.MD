@@ -20,8 +20,15 @@ git submodule update
 cd external/raylib
 cmake -B build && cmake --build build
 
+#  new Makefile
 make -f ./p18_minecraft_cpp/Makefile print
 make -f ./p18_minecraft_cpp/Makefile buildAndRun
+
+# cmake
+cd p19_game1
+# first run will take some time
+cmake -S . -B build
+cmake --build build -- -j$(nproc)
 ```
 
 ## Build and Run
@@ -89,6 +96,8 @@ cargo test
   - <img style="width: 450px" src="./p17_3d_terrain_movement/image.png" />
 - p18 - minecraft (see reference)
   - <img style="width: 450px" src="./p18_minecraft_cpp/image.png" />
+- p19 - game example (see reference)
+  - <img style="width: 450px" src="./p19_game1/image.png" />
 
 ## References
 
@@ -99,3 +108,4 @@ cargo test
 1. <https://github.com/raysan5/raygui>
 1. <https://github.com/misabitencourt/3d-terrain-movement>
 1. <https://github.com/LelsersLasers/Minecraft/tree/main>
+1. <https://github.com/Cakez77/MyFirstGame>
