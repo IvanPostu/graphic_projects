@@ -29,6 +29,12 @@ cd p19_game1
 # first run will take some time
 cmake -S . -B build
 cmake --build build -- -j$(nproc)
+
+# cmake2
+cd ogldev/tutorial1
+cmake -S . -B build
+cmake --build build
+./build/tutorial1
 ```
 
 ## Build and Run
@@ -109,3 +115,5 @@ cargo test
 1. <https://github.com/misabitencourt/3d-terrain-movement>
 1. <https://github.com/LelsersLasers/Minecraft/tree/main>
 1. <https://github.com/Cakez77/MyFirstGame>
+1. <https://github.com/emeiri/ogldev>
+1. <https://www.youtube.com/playlist?list=PLA0dXqQjCx0S04ntJKUftl6OaOgsiwHjA>

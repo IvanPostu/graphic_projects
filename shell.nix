@@ -10,18 +10,20 @@ pkgs.mkShell {
   ];
 
   buildInputs = with pkgs; [
-    cmake
     rustup
+   
+    cmake
     gcc14
     binutils # provides gprof
     clang-tools
-    cmake
     libx11 # needed to build raylib
     libxrandr # needed to build raylib
     libxinerama # needed to build raylib
     libxcursor # needed to build raylib
     libxi # needed to build raylib
     glfw
+    freeglut
+    libGLU
   ];
 
   LANG = "en_US.UTF-8";
