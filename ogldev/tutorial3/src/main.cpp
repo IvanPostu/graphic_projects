@@ -21,11 +21,28 @@ static void RenderSceneCB() {
   glutSwapBuffers();
 }
 
-static void CreateVertexBuffer() {
+static void CreateVertexBuffer_CounterClockwise() {
+  printf("CreateVertexBuffer_CounterClockwise\n");
+  glEnable(GL_CULL_FACE);
+  glFrontFace(GL_CCW);
   Vector3f Vertices[3];
   Vertices[0] = Vector3f(-1.0f, -1.0f, 0.0f); // bottom left
   Vertices[1] = Vector3f(1.0f, -1.0f, 0.0f);  // bottom right
   Vertices[2] = Vector3f(0.0f, 1.0f, 0.0f);   // top
+
+  glGenBuffers(1, &VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+}
+
+static void CreateVertexBuffer_Clockwise() {
+  printf("CreateVertexBuffer_Clockwise\n");
+  glEnable(GL_CULL_FACE);
+  glFrontFace(GL_CW);
+  Vector3f Vertices[3];
+  Vertices[0] = Vector3f(-1.0f, -1.0f, 0.0f); // bottom left
+  Vertices[1] = Vector3f(0.0f, 1.0f, 0.0f);   // top
+  Vertices[2] = Vector3f(1.0f, -1.0f, 0.0f);  // bottom right
 
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -55,7 +72,7 @@ int main(int argc, char **argv) {
   GLclampf Red = 0.0f, Green = 0.0f, Blue = 0.0f, Alpha = 0.0f;
   glClearColor(Red, Green, Blue, Alpha);
 
-  CreateVertexBuffer();
+  CreateVertexBuffer_CounterClockwise();
 
   glutDisplayFunc(RenderSceneCB);
 
