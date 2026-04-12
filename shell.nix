@@ -24,12 +24,14 @@ pkgs.mkShell {
     glfw
     freeglut
     libGLU
+    glew
   ];
 
   LANG = "en_US.UTF-8";
   LC_ALL = "en_US.UTF-8";
 
   shellHook = ''
+      export QQQ=${pkgs.glew}
       export PROJECT_ROOT="${PROJECT_ROOT}"
       export RUSTUP_HOME="$PROJECT_ROOT/.rustup"
       export CARGO_HOME="$PROJECT_ROOT/.cargo"
@@ -40,5 +42,8 @@ pkgs.mkShell {
 
       export C_INCLUDE_PATH=$PROJECT_ROOT/external/raygui/src:$C_INCLUDE_PATH
       export CPLUS_INCLUDE_PATH=$PROJECT_ROOT/external/raygui/src:$CPLUS_INCLUDE_PATH
+
+      export C_INCLUDE_PATH=$PROJECT_ROOT/ogldev/Include:$C_INCLUDE_PATH
+      export CPLUS_INCLUDE_PATH=$PROJECT_ROOT/ogldev/Include:$CPLUS_INCLUDE_PATH
   '';
 }
