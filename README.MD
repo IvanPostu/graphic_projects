@@ -117,3 +117,4 @@ cargo test
 1. <https://github.com/Cakez77/MyFirstGame>
 1. <https://github.com/emeiri/ogldev>
 1. <https://www.youtube.com/playlist?list=PLA0dXqQjCx0S04ntJKUftl6OaOgsiwHjA>
+1. <https://github.com/travisvroman/kohi/blob/main/utils/Makefile>
