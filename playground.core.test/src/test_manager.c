@@ -42,13 +42,13 @@ u8 test_manager_run_tests(void) {
     u8 result = curr->data->func();
     if (result == PASSED) {
       ++passed;
-      printf("[PASSED]: %s", curr->data->desc);
+      printf("[PASSED]: %s\n", curr->data->desc);
     } else if (result == BYPASS) {
       ++skipped;
-      printf("[SKIPPED]: %s", curr->data->desc);
+      printf("[SKIPPED]: %s\n", curr->data->desc);
     } else {
       ++failed;
-      printf("[FAILED]: %s", curr->data->desc);
+      printf("[FAILED]: %s\n", curr->data->desc);
     }
     curr = curr->next;
   }
@@ -65,7 +65,7 @@ u8 test_manager_run_tests(void) {
            "Results: %d passed, %d failed, %d skipped.", passed, failed,
            skipped);
 
-  printf("%s\n%s", status, final_output);
+  printf("%s\n%s\n", status, final_output);
   return failed;
 }
 
