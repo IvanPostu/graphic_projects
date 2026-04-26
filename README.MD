@@ -67,6 +67,7 @@ cargo test
 
 - `readelf -Ws ./bin/libplayground.core.so`
 - `nm ./bin/libplayground.core.so`
+- `ldd ./bin/playground.core.tests` - show required dynamic libs
 
 ## Overview
 

@@ -16,7 +16,7 @@ LDFLAGS = -Lbin -Llib -L../playground.core/bin -lplayground.core
 # Base include flags
 INCLUDE_FLAGS = -Isrc -I../playground.core/src 
 
-DEFINES =
+DEFINES =-DAPI_EXPORT
 
 OUTPUT_NAME =
 
@@ -103,6 +103,7 @@ link-win32: OUTPUT_NAME = bin\$(ASSEMBLY_NAME).exe
 # 		Discovered the solution here for this: https://github.com/ziglang/zig/issues/8180
 link-linux: CFLAGS += -Wno-cast-function-type-mismatch -fPIC
 link-linux: LDFLAGS += -lm
+link-linux: LDFLAGS += -Wl,--no-undefined,--no-allow-shlib-undefined,-rpath='$$ORIGIN'
 link-linux: OUTPUT_NAME = bin/$(ASSEMBLY_NAME)
 
 link-macos: LDFLAGS += 

@@ -1,3 +1,4 @@
+#include "4_median_of_two_sorted_arrays.h"
 #include "expect.h"
 #include "test_manager.h"
 #include <stdio.h>
@@ -11,6 +12,10 @@ static u8 test_1_plus_2_is_3(void) {
 }
 
 int main(void) {
+  int nums1[] = {1, 2, 3};
+  int nums2[] = {5, 7, 8};
+  double r = findMedianSortedArrays(nums1, sizeof(nums1), nums2, sizeof(nums2));
+  printf("%f", r);
   test_manager_init();
 
   test_manager_register_test(test_1_plus_2_is_3, "Dummy test sum logic");
