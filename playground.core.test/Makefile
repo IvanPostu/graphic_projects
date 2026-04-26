@@ -111,6 +111,7 @@ link-macos: OUTPUT_NAME = bin/$(ASSEMBLY_NAME)
 link-win32 link-linux link-macos: link-common
 
 link-common: $(OBJ_FILES)
+	@echo   $<...
 	@gcc $(OBJ_FILES) -o $(OUTPUT_NAME) $(LDFLAGS)
 
 
