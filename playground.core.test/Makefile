@@ -1,4 +1,4 @@
-ASSEMBLY_NAME=playground.core.tests
+ASSEMBLY_NAME=playground.core.test
 
 # All compiler flags/rules used across the board.
 CFLAGS =-std=gnu11 -Wall -Wextra -Werror -Wno-error=deprecated-declarations -Wno-error=unused-function 
@@ -50,7 +50,7 @@ endif
 # =========================================================
 # BEGIN TARGET RECIPES
 # =========================================================
-.PHONY: all-release all-debug flags-debug flags-release 
+.PHONY: all-release all-debug flags-debug flags-release
 # .PHONY: genversion genversion-win32 genversion-linux genversion-macos 
 .PHONY: scaffold scaffold-win32 scaffold-linux scaffold-macos 
 .PHONY: link link-win32 link-linux link-macos
@@ -108,7 +108,9 @@ link-win32: OUTPUT_NAME = bin\$(ASSEMBLY_NAME).exe
 link-linux: CFLAGS += -Wno-cast-function-type-mismatch -fPIC
 link-linux: LDFLAGS += -lm
 link-linux: LDFLAGS += -Wl,--no-undefined,--no-allow-shlib-undefined
-# link-linux: LDFLAGS += -Wl,-rpath,$(abspath ../playground.core/bin)
+
+# TODO: big workaround in order to not move .so file in the same dir with exe, required smarter approach like debug only
+link-linux: LDFLAGS += -Wl,-rpath,$(abspath ../playground.core/bin)
 # -rpath='$$ORIGIN' - allows exe to look in the same dir for *.so dynamic lib
 link-linux: LDFLAGS += -Wl,-rpath='$$ORIGIN'
 link-linux: OUTPUT_NAME = bin/$(ASSEMBLY_NAME)
