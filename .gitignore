@@ -28,3 +28,4 @@ file.txt
 */**/obj
 dummy.txt
 misc
+**/compile_flags.txt

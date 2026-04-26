@@ -55,8 +55,8 @@ endif
 .PHONY: scaffold scaffold-win32 scaffold-linux scaffold-macos 
 .PHONY: link link-win32 link-linux link-macos
 
-all-release: scaffold flags-release compile link
-all-debug: scaffold flags-debug compile link
+all-release: scaffold flags-release compile link gen_compile_flags-release 
+all-debug: scaffold flags-debug compile link gen_compile_flags-debug 
 
 flags-debug: DEFINES += -D_DEBUG
 flags-debug: CFLAGS += -g -MD -O0 -fno-omit-frame-pointer
@@ -141,3 +141,20 @@ obj/%.m.o: %.m
 	@gcc $< $(CFLAGS) -c -o $@ $(DEFINES) $(INCLUDE_FLAGS)
 
 -include $(OBJ_FILES:.o=.d)
+
+.PHONY: gen_compile_flags-debug
+gen_compile_flags-debug: DEFINES += -D_DEBUG
+gen_compile_flags-debug: gen_compile_flags
+
+gen_compile_flags-release: DEFINES += -D_RELEASE
+gen_compile_flags-release: gen_compile_flags
+
+SEPARATOR := '------------'
+
+.PHONY: gen_compile_flags
+gen_compile_flags:
+ifeq ($(BUILD_PLATFORM),windows)
+	@..\misc\cfgen -outfile=compile_flags.txt $(INCLUDE_FLAGS) $(SEPARATOR) $(DEFINES) $(SEPARATOR) $(CFLAGS) $(SEPARATOR) $(LDFLAGS)
+else
+	@../misc/cfgen -outfile=compile_flags.txt $(INCLUDE_FLAGS) $(SEPARATOR) $(DEFINES) $(SEPARATOR) $(CFLAGS) $(SEPARATOR) $(LDFLAGS)
+endif
