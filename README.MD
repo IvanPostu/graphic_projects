@@ -35,6 +35,9 @@ cd ogldev/tutorial1
 cmake -S . -B build
 cmake --build build
 ./build/tutorial1
+
+# better Makefile config: playground.core.test
+make clean all BUILD_TYPE=release
 ```
 
 ## Build and Run

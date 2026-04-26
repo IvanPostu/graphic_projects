@@ -19,6 +19,7 @@ INCLUDE_FLAGS = -Isrc -I../playground.core/src
 DEFINES =-DAPI_EXPORT
 
 OUTPUT_NAME =
+BUILD_TYPE =
 
 UNAME_S := 
 ifneq ($(OS),Windows_NT)
@@ -47,16 +48,19 @@ else
     $(error Unsupported platform)
 endif
 
+ifeq ($(filter $(BUILD_TYPE),debug release),)
+$(error Invalid BUILD_TYPE=$(BUILD_TYPE). Must be 'debug' or 'release')
+endif
+
 # =========================================================
 # BEGIN TARGET RECIPES
 # =========================================================
 .PHONY: all-release all-debug flags-debug flags-release
-# .PHONY: genversion genversion-win32 genversion-linux genversion-macos 
 .PHONY: scaffold scaffold-win32 scaffold-linux scaffold-macos 
-.PHONY: link link-win32 link-linux link-macos
+.PHONY: link link-win32 link-linux link-linux-release link-linux-debug link-macos
 
-all-release: scaffold flags-release compile link gen_compile_flags-release 
-all-debug: scaffold flags-debug compile link gen_compile_flags-debug 
+# should be first to be as default
+all: scaffold flags-$(BUILD_TYPE) compile link gen_compile_flags-$(BUILD_TYPE) 
 
 flags-debug: DEFINES += -D_DEBUG
 flags-debug: CFLAGS += -g -MD -O0 -fno-omit-frame-pointer
@@ -64,7 +68,7 @@ flags-debug: LDFLAGS += -g
 
 flags-release: DEFINES += -D_RELEASE
 flags-release: CFLAGS += -MD -O2
-flags-release: LDFLAGS += 
+flags-release: LDFLAGS +=
 
 scaffold: scaffold-$(PLATFORM)
 
@@ -90,12 +94,18 @@ clean-linux clean-macos:
 	@rm -rf bin/*
 	@rm -rf obj/*
 
-
-link: link-$(PLATFORM)
+# TODO: do same for mac and windows
+link: link-$(PLATFORM)-$(BUILD_TYPE)
 
 link-win32: LDFLAGS += -fdeclspec -Wno-cast-function-type-mismatch -Xlinker /INCREMENTAL 
 link-win32: DEFINES += -D_CRT_SECURE_NO_WARNINGS -DUNICODE
 link-win32: OUTPUT_NAME = bin\$(ASSEMBLY_NAME).exe
+
+link-linux-debug: LDFLAGS += -Wl,-rpath,$(abspath ../playground.core/bin)
+link-linux-debug: link-linux
+link-linux-release: LDFLAGS += -Wl,-rpath='$$ORIGIN'
+link-linux-release: link-linux
+
 
 # 		NOTE: --no-undefined and --no-allow-shlib-undefined ensure that symbols linking against are resolved.
 # 		These are linux-specific, as the default behaviour is the opposite of this, allowing code to compile 
@@ -106,9 +116,7 @@ link-linux: LDFLAGS += -lm
 link-linux: LDFLAGS += -Wl,--no-undefined,--no-allow-shlib-undefined
 
 # TODO: big workaround in order to not move .so file in the same dir with exe, required smarter approach like debug only
-link-linux: LDFLAGS += -Wl,-rpath,$(abspath ../playground.core/bin)
 # -rpath='$$ORIGIN' - allows exe to look in the same dir for *.so dynamic lib
-link-linux: LDFLAGS += -Wl,-rpath='$$ORIGIN'
 link-linux: OUTPUT_NAME = bin/$(ASSEMBLY_NAME)
 
 link-macos: LDFLAGS += 
@@ -147,7 +155,7 @@ SEPARATOR := '------------'
 
 .PHONY: gen_compile_flags
 gen_compile_flags:
-ifeq ($(BUILD_PLATFORM),windows)
+ifeq ($(PLATFORM),win32)
 	@..\misc\cfgen -outfile=compile_flags.txt $(INCLUDE_FLAGS) $(SEPARATOR) $(DEFINES) $(SEPARATOR) $(CFLAGS) $(SEPARATOR) $(LDFLAGS)
 else
 	@../misc/cfgen -outfile=compile_flags.txt $(INCLUDE_FLAGS) $(SEPARATOR) $(DEFINES) $(SEPARATOR) $(CFLAGS) $(SEPARATOR) $(LDFLAGS)
