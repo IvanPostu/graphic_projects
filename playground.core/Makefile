@@ -1,25 +1,25 @@
-ASSEMBLY_NAME=playground.tests
+ASSEMBLY_NAME=playground.core
 
 # All compiler flags/rules used across the board.
 CFLAGS =-std=gnu11 -Wall -Wextra -Werror -Wno-error=deprecated-declarations -Wno-error=unused-function 
 CFLAGS +=-Wvla -Werror=vla -Wno-missing-braces -Wstrict-prototypes -Wno-unused-parameter 
 CFLAGS +=-Wno-missing-field-initializers -Wno-tautological-compare 
-# NOTE: -fvisibility=hidden hides all symbols by default
+# NOTE: -fvisibility=hidden hides all symbols by default, and only those that explicitly say otherwise are exported (i.e. via _API).
 CFLAGS +=-fvisibility=hidden
 
 # clang specific flag
 # CFLAGS += -Wgnu-folding-constant
 
 # Base linker flags
-LDFLAGS = -Lbin -Llib -L../playground/bin
-# -lplayground 
+LDFLAGS = -Lbin -Llib
 
 # Base include flags
-INCLUDE_FLAGS = -Isrc -I../playground/src 
+INCLUDE_FLAGS = -Isrc
 
-DEFINES =
+DEFINES =-DAPI_EXPORT
 
 OUTPUT_NAME =
+
 
 UNAME_S := 
 ifneq ($(OS),Windows_NT)
@@ -45,16 +45,16 @@ else ifeq ($(UNAME_S),Darwin)
 	DIRECTORIES := $(shell find src -type d)
 	OBJ_FILES := $(SRC_FILES:%=obj/%.o)
 else
-    $(error Unsupported platform)
+  $(error Unsupported platform)
 endif
 
 # =========================================================
 # BEGIN TARGET RECIPES
 # =========================================================
 .PHONY: all-release all-debug flags-debug flags-release 
-# .PHONY: genversion genversion-win32 genversion-linux genversion-macos 
 .PHONY: scaffold scaffold-win32 scaffold-linux scaffold-macos 
 .PHONY: link link-win32 link-linux link-macos
+.PHONY: clean clean-win32 clean-linux clean-macos
 
 all-release: scaffold flags-release compile link
 all-debug: scaffold flags-debug compile link
@@ -63,7 +63,7 @@ flags-debug: DEFINES += -D_DEBUG
 flags-debug: CFLAGS += -g -MD -O0 -fno-omit-frame-pointer
 flags-debug: LDFLAGS += -g
 
-flags-release: DEFINES += -DKRELEASE
+flags-release: DEFINES += -D_RELEASE
 flags-release: CFLAGS += -MD -O2
 flags-release: LDFLAGS += 
 
@@ -72,18 +72,18 @@ scaffold: scaffold-$(PLATFORM)
 .NOTPARALLEL: scaffold
 
 scaffold-win32:
-	-@mkdir $(addprefix obj\\, $(DIRECTORIES)) 2>nul
 	@if not exist bin mkdir bin
+	-@mkdir $(addprefix obj\\, $(DIRECTORIES)) 2>nul
 
 scaffold-linux scaffold-macos:
 	@mkdir -p bin
 	@mkdir -p $(addprefix obj/,$(DIRECTORIES))
-	
 
-.PHONY: clean
+
 clean:    clean-$(PLATFORM)
 
 clean-win32:
+	@echo -- Cleaning --
 	if exist bin del /s /q bin\*.*
 	if exist obj del /s /q obj\*.*
 
@@ -93,27 +93,28 @@ clean-linux clean-macos:
 
 
 link: link-$(PLATFORM)
-
-link-win32: LDFLAGS += -fdeclspec -Wno-cast-function-type-mismatch -Xlinker /INCREMENTAL 
+ 
+# link-linux: CFLAGS += -fsanitize=address
+# link-win32: LDFLAGS += -fsanitize=address 
+link-win32: LDFLAGS += -fdeclspec -Wno-cast-function-type-mismatch -luser32 -lgdi32 -lwinmm -Xlinker /INCREMENTAL
 link-win32: DEFINES += -D_CRT_SECURE_NO_WARNINGS -DUNICODE
-link-win32: OUTPUT_NAME = bin\$(ASSEMBLY_NAME).exe
+link-win32: OUTPUT_NAME = bin\$(ASSEMBLY_NAME).dll
 
 # 		NOTE: --no-undefined and --no-allow-shlib-undefined ensure that symbols linking against are resolved.
 # 		These are linux-specific, as the default behaviour is the opposite of this, allowing code to compile 
 # 		here that would not on other platforms from not being exported (i.e. Windows)
 # 		Discovered the solution here for this: https://github.com/ziglang/zig/issues/8180
 link-linux: CFLAGS += -Wno-cast-function-type-mismatch -fPIC
-link-linux: LDFLAGS += -lm
-link-linux: OUTPUT_NAME = bin/$(ASSEMBLY_NAME)
+link-linux: LDFLAGS += -Wl,--no-undefined,--no-allow-shlib-undefined,-rpath='$$ORIGIN'
+link-linux: OUTPUT_NAME = bin/lib$(ASSEMBLY_NAME).so
 
-link-macos: LDFLAGS += 
-link-macos: OUTPUT_NAME = bin/$(ASSEMBLY_NAME)
+link-macos: LDFLAGS += -dynamiclib -install_name @rpath/lib$(ASSEMBLY_NAME).dylib -lobjc -framework AppKit -framework QuartzCore -framework DiskArbitration -framework CoreFoundation
+link-macos: OUTPUT_NAME = bin/lib$(ASSEMBLY_NAME).dylib
 
 link-win32 link-linux link-macos: link-common
 
 link-common: $(OBJ_FILES)
-	@gcc $(OBJ_FILES) -o $(OUTPUT_NAME) $(LDFLAGS)
-
+	@gcc $(OBJ_FILES) -o $(OUTPUT_NAME) -shared $(LDFLAGS)
 
 .PHONY: compile
 compile:

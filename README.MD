@@ -63,6 +63,11 @@ cargo run --bin=dsa_rust --package=dsa_rust
 cargo test
 ```
 
+## Inspect symbols
+
+- `readelf -Ws ./bin/libplayground.core.so`
+- `nm ./bin/libplayground.core.so`
+
 ## Overview
 
 - p1 - load obj file with png texture and render it
