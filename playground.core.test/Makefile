@@ -61,14 +61,10 @@ all-debug: scaffold flags-debug compile link gen_compile_flags-debug
 flags-debug: DEFINES += -D_DEBUG
 flags-debug: CFLAGS += -g -MD -O0 -fno-omit-frame-pointer
 flags-debug: LDFLAGS += -g
-flags-debug:
-	@echo "flags-debug:"
 
 flags-release: DEFINES += -D_RELEASE
 flags-release: CFLAGS += -MD -O2
 flags-release: LDFLAGS += 
-flags-release:
-	@echo "flags-release:"
 
 scaffold: scaffold-$(PLATFORM)
 
