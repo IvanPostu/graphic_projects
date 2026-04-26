@@ -39,7 +39,7 @@ else ifeq ($(UNAME_S),Linux)
 	DIRECTORIES := $(shell find src -type d)
 	OBJ_FILES := $(SRC_FILES:%=obj/%.o)
 else ifeq ($(UNAME_S),Darwin)
-    PLATFORM := macos
+  PLATFORM := macos
 	SRC_FILES := $(shell find src -type f \( -name "*.c" -o -name "*.m" \))
 	DIRECTORIES := $(shell find src -type d)
 	OBJ_FILES := $(SRC_FILES:%=obj/%.o)
@@ -61,10 +61,14 @@ all-debug: scaffold flags-debug compile link
 flags-debug: DEFINES += -D_DEBUG
 flags-debug: CFLAGS += -g -MD -O0 -fno-omit-frame-pointer
 flags-debug: LDFLAGS += -g
+flags-debug:
+	@echo "flags-debug:"
 
 flags-release: DEFINES += -D_RELEASE
 flags-release: CFLAGS += -MD -O2
 flags-release: LDFLAGS += 
+flags-release:
+	@echo "flags-release:"
 
 scaffold: scaffold-$(PLATFORM)
 
@@ -103,7 +107,10 @@ link-win32: OUTPUT_NAME = bin\$(ASSEMBLY_NAME).exe
 # 		Discovered the solution here for this: https://github.com/ziglang/zig/issues/8180
 link-linux: CFLAGS += -Wno-cast-function-type-mismatch -fPIC
 link-linux: LDFLAGS += -lm
-link-linux: LDFLAGS += -Wl,--no-undefined,--no-allow-shlib-undefined,-rpath='$$ORIGIN'
+link-linux: LDFLAGS += -Wl,--no-undefined,--no-allow-shlib-undefined
+# link-linux: LDFLAGS += -Wl,-rpath,$(abspath ../playground.core/bin)
+# -rpath='$$ORIGIN' - allows exe to look in the same dir for *.so dynamic lib
+link-linux: LDFLAGS += -Wl,-rpath='$$ORIGIN'
 link-linux: OUTPUT_NAME = bin/$(ASSEMBLY_NAME)
 
 link-macos: LDFLAGS += 
