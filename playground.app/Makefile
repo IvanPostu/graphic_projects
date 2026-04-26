@@ -1,3 +1,5 @@
+MAIN_ASSEMBLY_NAME = main1
+
 # All compiler flags/rules used across the board.
 CFLAGS =-std=gnu11 -Wall -Wextra -Werror -Wno-error=deprecated-declarations -Wno-error=unused-function 
 CFLAGS +=-Wvla -Werror=vla -Wno-missing-braces -Wstrict-prototypes -Wno-unused-parameter 
@@ -12,7 +14,6 @@ LDFLAGS = -Lbin -Llib
 INCLUDE_FLAGS = -Isrc
 DEFINES :=
 
-MAIN_ASSEMBLY_NAME =main1
 
 MAIN_OUTPUT_NAME =
 
