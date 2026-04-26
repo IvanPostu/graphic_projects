@@ -139,10 +139,8 @@ obj/%.m.o: %.m
 -include $(OBJ_FILES:.o=.d)
 
 .PHONY: gen_compile_flags-debug
-gen_compile_flags-debug: DEFINES += -D_DEBUG
 gen_compile_flags-debug: gen_compile_flags
 
-gen_compile_flags-release: DEFINES += -D_RELEASE
 gen_compile_flags-release: gen_compile_flags
 
 SEPARATOR := '------------'
