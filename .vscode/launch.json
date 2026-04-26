@@ -5,14 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug 'dsa_rust'",
+            "name": "Debug 'r_cfgen'",
             "type": "lldb",
             "request": "launch",
             "cargo": {
                 "args": [
                     "run",
-                    "--bin=dsa_rust",
-                    "--package=dsa_rust"
+                    "--bin=cfgen",
+                    "--package=r_cfgen",
+                    "--",
+                    "-outfile=dummy.txt",
+                    "qwe rty 123"
                 ]
             },
             "args": []

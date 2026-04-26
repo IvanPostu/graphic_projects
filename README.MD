@@ -49,18 +49,29 @@ cd $PROJECT_ROOT/p1_load_obj/build
 ./main.out
 ```
 
-## Rust setup + run (isn't used yet)
+## Rust setup + run
 
 ```sh
+# on Windows via git bash: https://rust-lang.org/tools/install/
+
 rustup default stable
 rustup component add rust-analyzer # install analyzer
 
-# VSCodium + rust-analyzer plugin
+# VSCodium + rust-analyzer plugin + codeLLB(debugger) plugin
 # set in settings.json "rust-analyzer.server.path" path to rust-analyzer executable
 
 cargo run
-cargo run --bin=dsa_rust --package=dsa_rust
+cargo run --bin=cfgen --package=r_cfgen
 cargo test
+cargo build --release \
+  --bin cfgen \
+  --package r_cfgen
+
+# --target x86_64-unknown-linux-gnu \
+
+mkdir -p misc
+
+cp target/release/cfgen misc/
 ```
 
 ## Inspect symbols
