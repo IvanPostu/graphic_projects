@@ -10,9 +10,12 @@ CFLAGS +=-fvisibility=hidden
 # clang specific flag
 # CFLAGS += -Wgnu-folding-constant
 
+CFLAGS += -I../external/raylib/build/raylib/include
+
 # Base linker flags
 # LDFLAGS = -Lbin -Llib -L../playground.core/bin -lplayground.core
 LDFLAGS = -Lbin -Llib
+LDFLAGS += -L../external/raylib/build/raylib -lraylib -lglfw -lGL -lm -lpthread -ldl -lrt -lX11
 
 # Base include flags
 # INCLUDE_FLAGS = -Isrc -I../playground.core/src 
@@ -51,6 +54,15 @@ else
     $(error Unsupported platform)
 endif
 
+SRC_DIR = resources
+DST_DIR = bin/resources
+
+ifeq ($(PLATFORM),win32)
+    COPY_DIR = xcopy /E /I /Y $(SRC_DIR) $(DST_DIR)
+else
+    COPY_DIR = cp -r $(SRC_DIR) $(DST_DIR)
+endif
+
 ifeq ($(filter $(BUILD_TYPE),debug release),)
 $(error Invalid BUILD_TYPE=$(BUILD_TYPE). Must be 'debug' or 'release')
 endif
@@ -63,7 +75,7 @@ endif
 .PHONY: link link-win32 link-macos link-linux link-linux-release link-linux-debug
 
 # should be first to be as default
-all: scaffold flags-$(BUILD_TYPE) compile link 
+all: scaffold flags-$(BUILD_TYPE) compile link copy_resources
 
 flags-debug: DEFINES += -D_DEBUG
 flags-debug: CFLAGS += -g -MD -O0 -fno-omit-frame-pointer
@@ -154,7 +166,7 @@ gen_compile_flags-debug: gen_compile_flags
 
 gen_compile_flags-release: gen_compile_flags
 
-SEPARATOR := '------------'
+SEPARATOR := '|------------'
 
 .PHONY: gen_compile_flags
 gen_compile_flags:
@@ -171,3 +183,6 @@ else
 		$(SEPARATOR) 'CFLAGS:' $(CFLAGS) \
 		$(SEPARATOR) 'LDFLAGS:' $(LDFLAGS)
 endif
+
+copy_resources:
+	$(COPY_DIR)
