@@ -38,6 +38,7 @@ cmake --build build
 
 # better Makefile config: playground.core.test
 make clean all BUILD_TYPE=release
+make clean all BUILD_TYPE=debug
 ```
 
 ## Build and Run
