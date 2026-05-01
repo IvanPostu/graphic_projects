@@ -29,12 +29,20 @@ typedef struct {
 } Movement;
 
 typedef struct {
+  float timer;
+  float delay;
+  float scale;
+  float rotation;
+} Removal;
+
+typedef struct {
   size_t index;
   Vector3 position;
   Vector3 size;
   Color color;
   int colorOffset;
   Movement movement;
+  Removal removal;
 } Block;
 
 typedef struct {
@@ -47,16 +55,22 @@ typedef struct {
   bool active;
 } FallingBlock;
 
-const Block default_block =
-    (Block){.index = 0,
-            .position = (Vector3){.x = 0, .y = 0, .z = 0},
-            .size = (Vector3){.x = 10, .y = 2, .z = 10},
-            .color = (Color){.r = 150, .g = 150, .b = 150, .a = 255},
-            .colorOffset = 0,
-            .movement = (Movement){
-                .speed = 0, .direction = FORWARD_DIRECTION, .axis = X_AXIS}};
+const Block DEFAULT_BLOCK = (Block){
+    .index = 0,
+    .position = (Vector3){.x = 0, .y = 0, .z = 0},
+    .size = (Vector3){.x = 10, .y = 2, .z = 10},
+    .color = (Color){.r = 150, .g = 150, .b = 150, .a = 255},
+    .colorOffset = 0,
+    .movement =
+        (Movement){.speed = 0, .direction = FORWARD_DIRECTION, .axis = X_AXIS},
+    .removal = (Removal){.delay = 0, .timer = 0, .scale = 1, .rotation = 0}};
 
-typedef enum { READY_STATE, PLAYING_STATE, GAME_OVER_STATE } GameState;
+typedef enum {
+  READY_STATE,
+  PLAYING_STATE,
+  GAME_OVER_STATE,
+  RESETTING_STATE
+} GameState;
 
 typedef struct {
   float scale;
@@ -99,7 +113,7 @@ void InitGame(Game *game) {
   game->state = READY_STATE;
   game->falling_blocks = nullptr;
   game->placed_blocks = nullptr;
-  game->current_block = default_block;
+  game->current_block = DEFAULT_BLOCK;
   game->current_block.colorOffset = GetRandomValue(0, 100);
   game->animations = (Animations){
       .score = (ScoreAnimation){.duration = 0, .scale = 1},
@@ -108,7 +122,7 @@ void InitGame(Game *game) {
                                     .alpha = 0,
                                     .offsetY = OVERLAY_ANIMATION_OFFSET_Y}};
 
-  arrpush(game->placed_blocks, default_block);
+  arrpush(game->placed_blocks, DEFAULT_BLOCK);
   game->previous_block = &game->placed_blocks[0];
 }
 
@@ -127,26 +141,48 @@ FallingBlock CreateFallingBlock(Vector3 position, Vector3 size, Color color) {
                         .active = true};
 }
 
-void DrawBlock(const Block *block, Shader lightingShader) {
+void ResetGame(Game *game) {
+  size_t len = arrlen(game->falling_blocks);
+  for (int i = len - 1; i >= 0; i--) {
+    FallingBlock *block = &game->falling_blocks[i];
+    if (!block->active) {
+      arrdelswap(game->falling_blocks, i);
+    }
+  }
+
+  game->state = PLAYING_STATE;
+  game->current_block = DEFAULT_BLOCK;
+  game->current_block.colorOffset = GetRandomValue(0, 100);
+  game->previous_block = &game->placed_blocks[0];
+}
+
+void DrawBlock(Game *game, const Block *block) {
   Vector4 normalizedColor = ColorNormalize(block->color);
   SetShaderValue(
-      lightingShader, GetShaderLocation(lightingShader, "blockColor"),
+      game->lighting_shader,
+      GetShaderLocation(game->lighting_shader, "blockColor"),
       &(Vector3){normalizedColor.x, normalizedColor.y, normalizedColor.z},
       SHADER_UNIFORM_VEC3);
 
-  BeginShaderMode(lightingShader);
-  {
-    DrawCube(block->position, block->size.x, block->size.y, block->size.z,
-             block->color);
-  }
-  EndShaderMode();
+  Matrix scale =
+      MatrixScale(block->size.x * block->removal.scale, block->size.y,
+                  block->size.z * block->removal.scale);
+  Matrix rotate =
+      MatrixRotateXYZ((Vector3){.x = 0, .y = block->removal.rotation, .z = 0});
+  Matrix translate =
+      MatrixTranslate(block->position.x, block->position.y, block->position.z);
+  Matrix transform = MatrixMultiply(scale, MatrixMultiply(rotate, translate));
+
+  game->cube_model.transform = transform;
+  game->cube_model.materials[0].shader = game->lighting_shader;
+  DrawModel(game->cube_model, (Vector3){0}, 1.0, block->color);
 }
 
 void DrawPlacedBlocks(Game *game) {
   size_t blocks_len = arrlen(game->placed_blocks);
   for (size_t i = 0; i < blocks_len; i++) {
     Block *block = &game->placed_blocks[i];
-    DrawBlock(block, game->lighting_shader);
+    DrawBlock(game, block);
   }
 }
 
@@ -172,14 +208,16 @@ Block CreateMovingBlock(Game *game) {
   float g = sinf(0.3 * offset + 2) * 55 + 200;
   float b = sinf(0.3 * offset + 4) * 55 + 200;
 
-  return (Block){.index = index,
-                 .position = position,
-                 .size = target->size,
-                 .color = (Color){r, g, b, 255},
-                 .colorOffset = target->colorOffset,
-                 .movement = (Movement){.speed = 12 + index * 0.5,
-                                        .direction = direction,
-                                        .axis = axis}};
+  return (Block){
+      .index = index,
+      .position = position,
+      .size = target->size,
+      .color = (Color){r, g, b, 255},
+      .colorOffset = target->colorOffset,
+      .movement = (Movement){.speed = 12 + index * 0.5,
+                             .direction = direction,
+                             .axis = axis},
+      .removal = (Removal){.delay = 0, .timer = 0, .scale = 1, .rotation = 0}};
 }
 
 bool PlaceBlock(Game *game) {
@@ -259,6 +297,15 @@ bool PlaceBlock(Game *game) {
   return true;
 }
 
+void StartTowerCollapse(Game *game) {
+  size_t len = arrlen(game->placed_blocks);
+  for (size_t i = 1; i < len; i++) {
+    Block *block = &game->placed_blocks[i];
+    // block->removal.active = true;
+    block->removal.delay = (len - i) * 0.05;
+  }
+}
+
 void UpdateGameState(Game *game) {
   bool inputPressed =
       IsKeyPressed(KEY_SPACE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
@@ -289,16 +336,18 @@ void UpdateGameState(Game *game) {
 
   case GAME_OVER_STATE: {
     if (inputPressed) {
-      arrfree(game->placed_blocks);
-      InitGame(game);
-      game->state = PLAYING_STATE;
-      game->current_block = CreateMovingBlock(game);
-
-      game->animations.overlay.type = GAME_OVER_OVERLAY;
-      game->animations.overlay.fade = FADING_OUT;
-      game->animations.overlay.alpha = 1;
-      game->animations.overlay.offsetY = 0;
+      game->state = RESETTING_STATE;
+      StartTowerCollapse(game);
     }
+    break;
+  }
+
+  case RESETTING_STATE: {
+    if (arrlen(game->placed_blocks) == 1) {
+      ResetGame(game);
+      game->current_block = CreateMovingBlock(game);
+    }
+
     break;
   }
   }
@@ -319,7 +368,7 @@ void DrawCurrentBlock(Game *game) {
     return;
   }
 
-  DrawBlock(&game->current_block, game->lighting_shader);
+  DrawBlock(game, &game->current_block);
 }
 
 void DrawFallingBlocks(Game *game) {
@@ -364,6 +413,31 @@ void UpdateFallingBlocks(Game *game, float dt) {
 
       if (block->position.y < -100) {
         block->active = false;
+      }
+    }
+  }
+}
+
+void UpdatePlacedBlocks(Game *game, float dt) {
+  if (game->state != RESETTING_STATE) {
+    return;
+  }
+
+  size_t len = arrlen(game->placed_blocks);
+  for (size_t i = len - 1; i > 0; i--) {
+    Block *block = &game->placed_blocks[i];
+
+    block->removal.timer += dt;
+
+    if (block->removal.timer >= block->removal.delay) {
+      float t = (block->removal.timer - block->removal.delay) / 0.2;
+      float scale = 1 - t;
+
+      block->removal.scale = scale;
+      block->removal.rotation = t * 7;
+
+      if (t > 0.9) {
+        arrdelswap(game->placed_blocks, i);
       }
     }
   }
@@ -500,6 +574,7 @@ int main(void) {
     UpdateScore(&game, dt);
     UpdateOverlay(&game, dt);
     UpdateFallingBlocks(&game, dt);
+    UpdatePlacedBlocks(&game, dt);
 
     SetShaderValue(game.lighting_shader,
                    GetShaderLocation(game.lighting_shader, "cameraPosition"),
