@@ -1,5 +1,6 @@
 #include <math.h>
 #include <raylib.h>
+#include <raymath.h>
 #include <rcamera.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +13,11 @@ const int WINDOW_WIDTH = 600;
 const int WINDOW_HEIGHT = 1000;
 const Color BG_COLOR = (Color){.r = 210, .g = 200, .b = 190, .a = 255};
 const int MOVEMENT_THRESHOLD = 12;
+
+const float SCORE_ANIMATION_DURATION = 0.2;
+const float SCORE_ANIMATION_SCALE = 1.5;
+
+const int OVERLAY_ANIMATION_OFFSET_Y = -50;
 
 typedef enum { FORWARD_DIRECTION, BACKWARD_DIRECTION } Direction;
 
@@ -42,12 +48,35 @@ const Block default_block =
                 .speed = 0, .direction = FORWARD_DIRECTION, .axis = X_AXIS}};
 
 typedef enum { READY_STATE, PLAYING_STATE, GAME_OVER_STATE } GameState;
+
+typedef struct {
+  float scale;
+  float duration;
+} ScoreAnimation;
+
+typedef enum { START_GAME_OVERLAY, GAME_OVER_OVERLAY } OverlayType;
+
+typedef enum { FADING_IN, FADING_OUT, NO_FADING } FadeState;
+
+typedef struct {
+  OverlayType type;
+  FadeState fade;
+  float alpha;
+  float offsetY;
+} OverlayAnimation;
+
+typedef struct {
+  ScoreAnimation score;
+  OverlayAnimation overlay;
+} Animations;
+
 typedef struct {
   GameState state;
   Block *placed_blocks;
   // last static block
   Block *previous_block;
-  Block current_block; // perhaps pointer is better
+  Block current_block;
+  Animations animations;
 } Game;
 
 void InitGame(Game *game) {
@@ -55,6 +84,12 @@ void InitGame(Game *game) {
   game->placed_blocks = nullptr;
   game->current_block = default_block;
   game->current_block.colorOffset = GetRandomValue(0, 100);
+  game->animations = (Animations){
+      .score = (ScoreAnimation){.duration = 0, .scale = 1},
+      .overlay = (OverlayAnimation){.type = START_GAME_OVERLAY,
+                                    .fade = FADING_IN,
+                                    .alpha = 0,
+                                    .offsetY = OVERLAY_ANIMATION_OFFSET_Y}};
 
   arrpush(game->placed_blocks, default_block);
   game->previous_block = &game->placed_blocks[0];
@@ -148,6 +183,9 @@ bool PlaceBlock(Game *game) {
   size_t len = arrlen(game->placed_blocks);
   game->previous_block = &game->placed_blocks[len - 1];
 
+  game->animations.score.duration = SCORE_ANIMATION_DURATION;
+  game->animations.score.scale = SCORE_ANIMATION_SCALE;
+
   return true;
 }
 
@@ -160,6 +198,7 @@ void UpdateGameState(Game *game) {
     if (inputPressed) {
       game->state = PLAYING_STATE;
       game->current_block = CreateMovingBlock(game);
+      game->animations.overlay.fade = FADING_OUT;
     }
     break;
   }
@@ -171,6 +210,8 @@ void UpdateGameState(Game *game) {
         game->current_block = CreateMovingBlock(game);
       } else {
         game->state = GAME_OVER_STATE;
+        game->animations.overlay.type = GAME_OVER_OVERLAY;
+        game->animations.overlay.fade = FADING_IN;
       }
     }
     break;
@@ -182,6 +223,11 @@ void UpdateGameState(Game *game) {
       InitGame(game);
       game->state = PLAYING_STATE;
       game->current_block = CreateMovingBlock(game);
+
+      game->animations.overlay.type = GAME_OVER_OVERLAY;
+      game->animations.overlay.fade = FADING_OUT;
+      game->animations.overlay.alpha = 1;
+      game->animations.overlay.offsetY = 0;
     }
     break;
   }
@@ -202,46 +248,53 @@ void DrawCurrentBlock(Game *game) {
   DrawBlock(&game->current_block);
 }
 
-void DrawGameStartOverlay(const Game *game) {
-  if (game->state != READY_STATE) {
-    return;
-  }
-
-  const char *title = "START GAME";
-  int fontSize = 60;
+void DrawOverlay(const Game *game, const char *title, const char *subtitle,
+                 size_t titleSize, size_t subtitleSize, int titleY,
+                 int subtitleY) {
+  Color dark = Fade(DARKGRAY, game->animations.overlay.alpha);
+  Color light = Fade(GRAY, game->animations.overlay.alpha);
 
   int screenWidth = GetScreenWidth();
-  int textSize = MeasureText(title, fontSize);
-  int position = (screenWidth - textSize) / 2;
-  DrawText(title, position, 50, fontSize, DARKGRAY);
+  int titleWidth = MeasureText(title, titleSize);
+  int subtitleWidth = MeasureText(subtitle, subtitleSize);
+
+  DrawText(title, (screenWidth - titleWidth) / 2,
+           titleY + game->animations.overlay.offsetY, titleSize, dark);
+  DrawText(subtitle, (screenWidth - subtitleWidth) / 2,
+           subtitleY + game->animations.overlay.offsetY, subtitleSize, light);
 }
 
-void DrawGameScore(Game *game) {
-  if (game->state != PLAYING_STATE) {
+void DrawGameStartOverlay(const Game *game) {
+  if (game->animations.overlay.type != START_GAME_OVERLAY) {
     return;
   }
 
-  const char *title = "100";
-  int fontSize = 60;
-
-  int screenWidth = GetScreenWidth();
-  int textSize = MeasureText(title, fontSize);
-  int position = (screenWidth - textSize) / 2;
-  DrawText(title, position, 50, fontSize, DARKGRAY);
+  DrawOverlay(game, "START GAME", "Click or Press Space", 60, 30, 100, 170);
 }
 
 void DrawGameOverOverlay(Game *game) {
-  if (game->state != GAME_OVER_STATE) {
+  if (game->animations.overlay.type != GAME_OVER_OVERLAY) {
     return;
   }
 
-  const char *title = "GAME OVER";
-  int fontSize = 60;
+  DrawOverlay(game, "GAME OVER", "Click or Press Space to Restart", 60, 30, 100,
+              170);
+}
 
+void DrawGameScore(Game *game) {
+  if (game->state == READY_STATE) {
+    return;
+  }
+
+  char text[16];
+  size_t score = arrlen(game->placed_blocks) - 1;
+  sprintf(text, "%zu", score);
+
+  int fontSize = 120 * game->animations.score.scale;
   int screenWidth = GetScreenWidth();
-  int textSize = MeasureText(title, fontSize);
+  int textSize = MeasureText(text, fontSize);
   int position = (screenWidth - textSize) / 2;
-  DrawText(title, position, 50, fontSize, DARKGRAY);
+  DrawText(text, position, 220, fontSize, DARKGRAY);
 }
 
 void UpdateCurrentBlock(Game *game, float dt) {
@@ -265,6 +318,46 @@ void UpdateCurrentBlock(Game *game, float dt) {
   }
 }
 
+void UpdateScore(Game *game, float dt) {
+  ScoreAnimation *animation = &game->animations.score;
+  if (animation->duration > 0) {
+    animation->duration -= dt;
+
+    float t = 1 - animation->duration / SCORE_ANIMATION_DURATION;
+    animation->scale = Lerp(SCORE_ANIMATION_SCALE, 1.0, t);
+
+    if (animation->duration <= 0) {
+      animation->duration = 0;
+      animation->scale = 1;
+    }
+  }
+}
+
+const float FADE_SPEED = 2.5;
+
+void UpdateOverlay(Game *game, float dt) {
+  OverlayAnimation *animation = &game->animations.overlay;
+  if (animation->fade == FADING_IN) {
+    animation->alpha += dt * FADE_SPEED;
+    animation->offsetY = Lerp(OVERLAY_ANIMATION_OFFSET_Y, 0, animation->alpha);
+
+    if (animation->alpha >= 1) {
+      animation->alpha = 1;
+      animation->offsetY = 0;
+      animation->fade = NO_FADING;
+    }
+  } else if (animation->fade == FADING_OUT) {
+    animation->alpha -= dt * FADE_SPEED;
+    animation->offsetY = Lerp(OVERLAY_ANIMATION_OFFSET_Y, 0, animation->alpha);
+
+    if (animation->alpha <= 0) {
+      animation->alpha = 0;
+      animation->offsetY = OVERLAY_ANIMATION_OFFSET_Y;
+      animation->fade = NO_FADING;
+    }
+  }
+}
+
 int main(void) {
   Game game;
   InitGame(&game);
@@ -283,6 +376,8 @@ int main(void) {
     UpdateGameState(&game);
     UpdateCameraPosition(&game, &camera);
     UpdateCurrentBlock(&game, dt);
+    UpdateScore(&game, dt);
+    UpdateOverlay(&game, dt);
 
     BeginDrawing();
     {
