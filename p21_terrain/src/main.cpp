@@ -11,7 +11,7 @@ static void HandleWindowScreenSize();
 
 int main(void) {
 
-  SetConfigFlags(FLAG_MSAA_4X_HINT); // optional, smoother edges
+  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "raylib - WASD camera + grid");
 
   // Define a 3D camera
@@ -26,6 +26,7 @@ int main(void) {
 
   // Enable mouse look
   DisableCursor();
+  ShowCursor();
 
   while (!WindowShouldClose()) {
     if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) {
@@ -60,24 +61,25 @@ int main(void) {
 static void HandleWindowScreenSize() {
   const int monitorIndex = GetCurrentMonitor();
   const bool isFullscreen = IsWindowFullscreen();
+  const int monitorPosX = GetMonitorPosition(monitorIndex).x;
+  const int monitorPosY = GetMonitorPosition(monitorIndex).y;
 
-  printf("isFullscreen=%d, monitorIndex=%d\n", isFullscreen, monitorIndex);
+  printf("isFullscreen=%d, monitorIndex=%d, monitorPosX=%d, monitorPosY=%d\n", isFullscreen, monitorIndex, monitorPosX, monitorPosY);
   if (isFullscreen) {
     SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
   } else {
 
     // Workaround due to the bug that turns monitor index=1 OFF on Linux - X11
-    if (GetMonitorPosition(monitorIndex).x == 0 && GetMonitorPosition(monitorIndex).y == 0 &&
-        GetMonitorWidth(monitorIndex) == GetScreenWidth() && GetMonitorHeight(monitorIndex) == GetScreenHeight()) {
+    if (GetMonitorWidth(monitorIndex) == GetScreenWidth() && GetMonitorHeight(monitorIndex) == GetScreenHeight()) {
+      ClearWindowState(FLAG_WINDOW_UNDECORATED);
       SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+
       return;
     }
 
-    SetWindowSize(GetMonitorWidth(monitorIndex), GetMonitorHeight(monitorIndex));
     SetWindowState(FLAG_WINDOW_UNDECORATED);
-
-    SetWindowPosition(GetMonitorPosition(monitorIndex).x,
-                      GetMonitorPosition(monitorIndex).y);
+    SetWindowSize(GetMonitorWidth(monitorIndex), GetMonitorHeight(monitorIndex));
+    SetWindowPosition(monitorPosX, monitorPosY);
 
     // BUG: turns monitor index=1 OFF on Linux - X11
     // ToggleFullscreen();

@@ -66,7 +66,18 @@ else
 endif
 
 ifeq ($(filter $(BUILD_TYPE),debug release),)
-$(error Invalid BUILD_TYPE=$(BUILD_TYPE). Must be 'debug' or 'release')
+	$(error Invalid BUILD_TYPE=$(BUILD_TYPE). Must be 'debug' or 'release')
+endif
+
+ifeq ($(BUILD_TYPE),debug)
+	DEFINES += -D_DEBUG
+	CFLAGS += -g -MD
+# -fno-omit-frame-pointer
+	LDFLAGS += -g
+else
+	DEFINES += -D_RELEASE
+	CFLAGS += -MD -O2
+	LDFLAGS +=
 endif
 
 # =========================================================
@@ -80,14 +91,6 @@ endif
 # should be first to be as default
 all: scaffold compile link 
 #copy_resources
-
-# flags-debug: DEFINES += -D_DEBUG
-# flags-debug: CFLAGS += -g -MD -O0 -fno-omit-frame-pointer
-# flags-debug: LDFLAGS += -g
-
-# flags-release: DEFINES += -D_RELEASE
-# flags-release: CFLAGS += -MD -O2
-# flags-release: LDFLAGS +=
 
 scaffold: scaffold-$(PLATFORM)
 
@@ -141,36 +144,22 @@ link-macos: OUTPUT_NAME = bin/$(ASSEMBLY_NAME)
 link-win32 link-linux link-macos: link-common
 
 link-common: $(OBJ_FILES)
-	@echo $(CXX) $(OBJ_FILES) -o $(OUTPUT_NAME) $(LDFLAGS)
+	@echo $<...
 	$(CXX) $(OBJ_FILES) -o $(OUTPUT_NAME) $(LDFLAGS)
 
 
 # TODO: do same for mac and windows
-compile: compile-$(PLATFORM)-$(BUILD_TYPE)
-
-compile-debug: DEFINES += -D_DEBUG
-compile-debug: CFLAGS += -g -MD -O0 -fno-omit-frame-pointer
-compile-debug: LDFLAGS += -g
-compile-debug: compile-common
-
-compile-release: DEFINES += -D_RELEASE
-compile-release: CFLAGS += -MD -O2
-compile-release: LDFLAGS +=
-compile-release: compile-common
-
-compile-common:
--include gen_compile_flags-$(BUILD_TYPE)
+compile:
 -include $(OBJ_FILES:.o=.d)
-
 
 # compile .cpp to .o object for windows, linux and mac
 obj/%.cpp.o: %.cpp 
-	@echo $(CXX) $< $(CFLAGS) -c -o $@ $(DEFINES) $(INCLUDE_FLAGS)
+	@echo $<...
 	$(CXX) $< $(CFLAGS) -c -o $@ $(DEFINES) $(INCLUDE_FLAGS)
 
 # compile .m to .o object only for macos
 obj/%.m.o: %.m
-	@echo $(CXX) $< $(CFLAGS) -c -o $@ $(DEFINES) $(INCLUDE_FLAGS)
+	@echo $<...
 	$(CXX) $< $(CFLAGS) -c -o $@ $(DEFINES) $(INCLUDE_FLAGS)
 
 -include $(OBJ_FILES:.o=.d)
