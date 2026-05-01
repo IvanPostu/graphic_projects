@@ -2,6 +2,7 @@
 #include <raymath.h>
 #include <cmath>
 #include <cstdlib>
+#include <stdio.h>
 
 int main(void) {
 
@@ -23,31 +24,20 @@ int main(void) {
   const int terrainImageHeight = 200; // pixel height of the heightmap image (more = more detail)
 
   Image heightmapImage = GenImageCellular(terrainImageWidth, terrainImageHeight, 16);
-  // Alternative: GetImagePerlinNoise(); // for smoother more organic terrain
-  // Alternative:  LoadImage
 
   // the vec3 defines {width, max_height, depth}
   Mesh terrainMesh = GenMeshHeightmap(heightmapImage, (Vector3){terrainWorldWidth, terrainMaxHeight, terrainWorldDepth});
 
   UnloadImage(heightmapImage);
 
-  // A Model can hold multiple meshes and materials, making it easier to draw
   Model terrainModel = LoadModelFromMesh(terrainMesh);
-
-  // Set the terrain's appearance. Models have materials, and materials have maps (textures/colors).
-  // terrainModel.materials[0] is the default material for meshes loaded this way.
-  // MATERIAL_MAP_DIFFUSE (or MATERIAL_MAP_ALBEDO) is the base color map.
   terrainModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].color = GRAY; // Give the terrain a simple gray color
-  // Alternative for textured terrain:
-  // Texture2D terrainTex = LoadTexture("path/to/terrain_texture.png");
-  // terrainModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = terrainTex;
+
+  printf("materialCount=%d\n", terrainModel.materialCount);
 
   // Spaceship Setup (using a simple cube)
   // Create a mesh for a cube. Arguments are width, height, depth.
   Mesh cubeMesh = GenMeshCube(2.0f, 2.0f, 2.0f); // A 2x2x2 cube will represent our ship
-  // Alternative: Load your own 3D model
-  // Model shipModel = LoadModel("path/to/your/spacecraft.fbx"); // or .obj, .gltf
-  // Make sure to adjust projectile spawn points and camera offsets if using a custom model.
 
   // Load the cube mesh into a Model structure.
   Model shipModel = LoadModelFromMesh(cubeMesh); // Using 'shipModel' for clarity
@@ -57,8 +47,6 @@ int main(void) {
   // Alternative: If using a loaded model with its own textures, this might not be needed,
   // or you might use it to tint the existing texture.
 
-  // Ship's initial state variables
-  // Start the ship roughly in the center of the terrain, and elevated.
   Vector3 shipPosition = {terrainWorldWidth / 2.0f, terrainMaxHeight + 10.0f, terrainWorldDepth / 2.0f};
   float shipYaw = 0.0f;   // Rotation around the ship's local Y-axis (turning left/right). In radians.
   float shipPitch = 0.0f; // Rotation around the ship's local X-axis (looking up/down). In radians.
