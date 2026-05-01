@@ -186,3 +186,10 @@ endif
 
 copy_resources:
 	$(COPY_DIR)
+
+.ONESHELL:
+
+run:
+	set -e
+	cd bin
+	./$(ASSEMBLY_NAME)

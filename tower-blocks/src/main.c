@@ -1,10 +1,9 @@
 #include <math.h>
 #include <raylib.h>
-#include <raymath.h>
 #include <rcamera.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <raymath.h>
 #include "stb_ds.h"
 
 #define nullptr NULL
@@ -37,6 +36,16 @@ typedef struct {
   int colorOffset;
   Movement movement;
 } Block;
+
+typedef struct {
+  Vector3 position;
+  Vector3 size;
+  Vector3 rotation;
+  Vector3 rotationSpeed;
+  Vector3 velocity;
+  Color color;
+  bool active;
+} FallingBlock;
 
 const Block default_block =
     (Block){.index = 0,
@@ -71,16 +80,20 @@ typedef struct {
 } Animations;
 
 typedef struct {
+  Model cube_model;
   GameState state;
   Block *placed_blocks;
   // last static block
   Block *previous_block;
   Block current_block;
   Animations animations;
+  FallingBlock *falling_blocks;
 } Game;
 
 void InitGame(Game *game) {
+  game->cube_model = LoadModelFromMesh(GenMeshCube(1, 1, 1));
   game->state = READY_STATE;
+  game->falling_blocks = nullptr;
   game->placed_blocks = nullptr;
   game->current_block = default_block;
   game->current_block.colorOffset = GetRandomValue(0, 100);
@@ -93,6 +106,21 @@ void InitGame(Game *game) {
 
   arrpush(game->placed_blocks, default_block);
   game->previous_block = &game->placed_blocks[0];
+}
+
+FallingBlock CreateFallingBlock(Vector3 position, Vector3 size, Color color) {
+  return (FallingBlock){.position = position,
+                        .size = size,
+                        .rotation = (Vector3){0},
+                        .rotationSpeed =
+                            (Vector3){
+                                .x = GetRandomValue(-300, 300) / 100.f,
+                                .y = GetRandomValue(-300, 300) / 100.f,
+                                .z = GetRandomValue(-300, 300) / 100.f,
+                            },
+                        .velocity = (Vector3){0, -12, 0},
+                        .color = color,
+                        .active = true};
 }
 
 void DrawBlock(const Block *block) {
@@ -177,6 +205,36 @@ bool PlaceBlock(Game *game) {
       current->size.z = overlay;
       current->position.z = targetPosition + delta / 2;
     }
+
+    float choppedSize = currentSize - overlay;
+    if (choppedSize > 0.1) {
+      Vector3 choppedPosition = current->position;
+      Vector3 choppedSizeVec = current->size;
+
+      if (isXAxis) {
+        choppedSizeVec.x = choppedSize;
+        if (delta > 0) {
+          choppedPosition.x =
+              currentPosition + currentSize / 2 - choppedSize / 2;
+        } else {
+          choppedPosition.x =
+              currentPosition - currentSize / 2 + choppedSize / 2;
+        }
+      } else {
+        choppedSizeVec.z = choppedSize;
+        if (delta > 0) {
+          choppedPosition.z =
+              currentPosition + currentSize / 2 - choppedSize / 2;
+        } else {
+          choppedPosition.z =
+              currentPosition - currentSize / 2 + choppedSize / 2;
+        }
+      }
+
+      arrpush(
+          game->falling_blocks,
+          CreateFallingBlock(choppedPosition, choppedSizeVec, current->color));
+    }
   }
 
   arrpush(game->placed_blocks, game->current_block);
@@ -234,10 +292,14 @@ void UpdateGameState(Game *game) {
   }
 }
 
+const float CAMERA_SPEED = 0.1f;
+
 void UpdateCameraPosition(const Game *game, Camera3D *camera) {
   size_t placed_blocks_len = arrlen(game->placed_blocks);
-  camera->position.y = 50 + 2 * placed_blocks_len;
-  camera->target.y = 2 * placed_blocks_len;
+  camera->position.y =
+      Lerp(camera->position.y, 50 + 2 * placed_blocks_len, CAMERA_SPEED);
+  camera->target.y =
+      Lerp(camera->target.y, 2 * placed_blocks_len, CAMERA_SPEED);
 }
 
 void DrawCurrentBlock(Game *game) {
@@ -246,6 +308,46 @@ void DrawCurrentBlock(Game *game) {
   }
 
   DrawBlock(&game->current_block);
+}
+
+void DrawFallingBlocks(Game *game) {
+  size_t len = arrlen(game->falling_blocks);
+  for (size_t i = 0; i < len; i++) {
+    FallingBlock *block = &game->falling_blocks[i];
+    if (block->active) {
+      Matrix scale = MatrixScale(block->size.x, block->size.y, block->size.z);
+      Matrix rotate = MatrixRotateXYZ(block->rotation);
+      Matrix translate = MatrixTranslate(block->position.x, block->position.y,
+                                         block->position.z);
+      Matrix transform =
+          MatrixMultiply(scale, MatrixMultiply(rotate, translate));
+
+      game->cube_model.transform = transform;
+
+      DrawModel(game->cube_model, (Vector3){0}, 1.0, block->color);
+      DrawModelWires(game->cube_model, (Vector3){0}, 1.0, BLACK);
+    }
+  }
+}
+
+void UpdateFallingBlocks(Game *game, float dt) {
+  size_t len = arrlen(game->falling_blocks);
+  for (size_t i = 0; i < len; i++) {
+    FallingBlock *block = &game->falling_blocks[i];
+    if (block->active) {
+      block->rotation.x += block->rotationSpeed.x * dt;
+      block->rotation.y += block->rotationSpeed.y * dt;
+      block->rotation.z += block->rotationSpeed.z * dt;
+
+      block->position.x += block->velocity.x * dt;
+      block->position.y += block->velocity.y * dt;
+      block->position.z += block->velocity.z * dt;
+
+      if (block->position.y < -100) {
+        block->active = false;
+      }
+    }
+  }
 }
 
 void DrawOverlay(const Game *game, const char *title, const char *subtitle,
@@ -359,11 +461,11 @@ void UpdateOverlay(Game *game, float dt) {
 }
 
 int main(void) {
-  Game game;
-  InitGame(&game);
-
   InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Tower Blocks");
   SetTargetFPS(60);
+
+  Game game;
+  InitGame(&game);
 
   Camera3D camera = (Camera3D){.position = (Vector3){.x = 50, .y = 50, .z = 50},
                                .target = (Vector3){.x = 0, .y = 0, .z = 0},
@@ -378,6 +480,7 @@ int main(void) {
     UpdateCurrentBlock(&game, dt);
     UpdateScore(&game, dt);
     UpdateOverlay(&game, dt);
+    UpdateFallingBlocks(&game, dt);
 
     BeginDrawing();
     {
@@ -385,6 +488,7 @@ int main(void) {
       BeginMode3D(camera);
       DrawPlacedBlocks(&game);
       DrawCurrentBlock(&game);
+      DrawFallingBlocks(&game);
       EndMode3D();
     }
     EndDrawing();
