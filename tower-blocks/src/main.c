@@ -80,6 +80,7 @@ typedef struct {
 } Animations;
 
 typedef struct {
+  Shader lighting_shader;
   Model cube_model;
   GameState state;
   Block *placed_blocks;
@@ -91,6 +92,9 @@ typedef struct {
 } Game;
 
 void InitGame(Game *game) {
+  game->lighting_shader =
+      LoadShader("resources/shaders/lighting_vertex.glsl",
+                 "resources/shaders/lighting_fragment.glsl");
   game->cube_model = LoadModelFromMesh(GenMeshCube(1, 1, 1));
   game->state = READY_STATE;
   game->falling_blocks = nullptr;
@@ -123,18 +127,26 @@ FallingBlock CreateFallingBlock(Vector3 position, Vector3 size, Color color) {
                         .active = true};
 }
 
-void DrawBlock(const Block *block) {
-  DrawCube(block->position, block->size.x, block->size.y, block->size.z,
-           block->color);
-  DrawCubeWires(block->position, block->size.x, block->size.y, block->size.z,
-                BLACK);
+void DrawBlock(const Block *block, Shader lightingShader) {
+  Vector4 normalizedColor = ColorNormalize(block->color);
+  SetShaderValue(
+      lightingShader, GetShaderLocation(lightingShader, "blockColor"),
+      &(Vector3){normalizedColor.x, normalizedColor.y, normalizedColor.z},
+      SHADER_UNIFORM_VEC3);
+
+  BeginShaderMode(lightingShader);
+  {
+    DrawCube(block->position, block->size.x, block->size.y, block->size.z,
+             block->color);
+  }
+  EndShaderMode();
 }
 
 void DrawPlacedBlocks(Game *game) {
   size_t blocks_len = arrlen(game->placed_blocks);
   for (size_t i = 0; i < blocks_len; i++) {
     Block *block = &game->placed_blocks[i];
-    DrawBlock(block);
+    DrawBlock(block, game->lighting_shader);
   }
 }
 
@@ -307,7 +319,7 @@ void DrawCurrentBlock(Game *game) {
     return;
   }
 
-  DrawBlock(&game->current_block);
+  DrawBlock(&game->current_block, game->lighting_shader);
 }
 
 void DrawFallingBlocks(Game *game) {
@@ -324,8 +336,15 @@ void DrawFallingBlocks(Game *game) {
 
       game->cube_model.transform = transform;
 
+      Vector4 normalizedColor = ColorNormalize(block->color);
+      SetShaderValue(
+          game->lighting_shader,
+          GetShaderLocation(game->lighting_shader, "blockColor"),
+          &(Vector3){normalizedColor.x, normalizedColor.y, normalizedColor.z},
+          SHADER_UNIFORM_VEC3);
+
+      game->cube_model.materials[0].shader = game->lighting_shader;
       DrawModel(game->cube_model, (Vector3){0}, 1.0, block->color);
-      DrawModelWires(game->cube_model, (Vector3){0}, 1.0, BLACK);
     }
   }
 }
@@ -482,6 +501,9 @@ int main(void) {
     UpdateOverlay(&game, dt);
     UpdateFallingBlocks(&game, dt);
 
+    SetShaderValue(game.lighting_shader,
+                   GetShaderLocation(game.lighting_shader, "cameraPosition"),
+                   &camera.position, SHADER_UNIFORM_VEC3);
     BeginDrawing();
     {
       ClearBackground(BG_COLOR);
