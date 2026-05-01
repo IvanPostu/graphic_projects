@@ -5,10 +5,13 @@ in vec2 vertexTexCoord;
 
 uniform mat4 mvp;
 
-out vec3 fragPos;
+out vec3 worldPos;
+out vec2 uv;
 
 void main()
 {
-    fragPos = vertexPosition;
+    worldPos = vertexPosition;
+    uv = vertexTexCoord;
+
     gl_Position = mvp * vec4(vertexPosition, 1.0);
 }
