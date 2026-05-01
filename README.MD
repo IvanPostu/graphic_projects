@@ -39,6 +39,8 @@ cmake --build build
 # better Makefile config: playground.core.test
 make clean all BUILD_TYPE=release
 make clean all BUILD_TYPE=debug
+# "run" is linux only
+make clean all BUILD_TYPE=debug run
 ```
 
 ## Build and Run
@@ -126,6 +128,8 @@ cp target/release/cfgen misc/
   - <img style="width: 450px" src="./p18_minecraft_cpp/image.png" />
 - p19 - game example (see reference)
   - <img style="width: 450px" src="./p19_game1/image.png" />
+- tower-blocks -  (see references)
+  - <img style="width: 450px" src="./tower-blocks/image.png" />
 
 ## References
 
@@ -140,3 +144,5 @@ cp target/release/cfgen misc/
 1. <https://github.com/emeiri/ogldev>
 1. <https://www.youtube.com/playlist?list=PLA0dXqQjCx0S04ntJKUftl6OaOgsiwHjA>
 1. <https://github.com/travisvroman/kohi/blob/main/utils/Makefile>
+1. [Raylib C++ 3D Tutorial: Spaceship Flight, Terrain Gen & Projectile System](https://www.youtube.com/watch?v=xWYcA1RZwXU)
+1. [Tower Blocks in C and Raylib: Tower Collapse](https://www.youtube.com/watch?v=vFQlTZ1J_E0)
