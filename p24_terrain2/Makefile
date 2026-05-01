@@ -1,6 +1,7 @@
 ASSEMBLY_NAME=main
 
 CXX := g++
+CC := gcc
 
 # All compiler flags/rules used across the board.
 CFLAGS =-Wall -Wextra -Werror -Wno-error=deprecated-declarations

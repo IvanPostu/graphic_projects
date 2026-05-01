@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <rlgl.h>
 #include <raymath.h>
 #include <cmath>
 #include <cstdlib>
@@ -8,6 +9,9 @@ int main(void) {
 
   const int screenWidth = 1200;
   const int screenHeight = 800;
+
+  SetConfigFlags(FLAG_VSYNC_HINT);
+  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 
   InitWindow(screenWidth, screenHeight, "Demo");
   DisableCursor();
@@ -33,6 +37,9 @@ int main(void) {
   Model terrainModel = LoadModelFromMesh(terrainMesh);
   terrainModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].color = GRAY; // Give the terrain a simple gray color
 
+  Shader shader = LoadShader("resources/terrain.vs", "resources/terrain.fs");
+  terrainModel.materials[0].shader = shader;
+
   printf("materialCount=%d\n", terrainModel.materialCount);
 
   // Spaceship Setup (using a simple cube)
@@ -54,7 +61,7 @@ int main(void) {
   const float mouseSensitivity = 0.003f; // How much the ship rotates per pixel of mouse movement. Adjust to taste.
   const float moveSpeed = 25.0f;         // How fast the ship moves in world units per second.
 
-  SetTargetFPS(60);
+  bool terrainBackfaceCoolingEnabled = true;
 
   while (!WindowShouldClose()) {
     float dt = GetFrameTime();
@@ -89,6 +96,10 @@ int main(void) {
     if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_Q))
       moveDirection.y -= 1.0f; // Move down globally
 
+    if (IsKeyPressed(KEY_P)) {
+      terrainBackfaceCoolingEnabled = !terrainBackfaceCoolingEnabled;
+    }
+
     if (Vector3LengthSqr(moveDirection) > 0.001f) {
       moveDirection = Vector3Normalize(moveDirection);
       shipPosition = Vector3Add(shipPosition, Vector3Scale(moveDirection, moveSpeed * dt));
@@ -111,8 +122,17 @@ int main(void) {
     ClearBackground(SKYBLUE); // A nice sky blue color
     BeginMode3D(camera);
 
-    DrawModelWires(terrainModel, Vector3Zero(), 1.0f, LIME); // Draw terrain wireframe
-    DrawModel(terrainModel, Vector3Zero(), 1.0f, WHITE);     // Draw solid terrain (WHITE tint doesn't override material color, just multiplies)
+    // DrawModelWires(terrainModel, Vector3Zero(), 1.0f, LIME); // Draw terrain wireframe
+
+    if (terrainBackfaceCoolingEnabled) {
+      DrawModel(terrainModel, Vector3Zero(), 1.0f, WHITE);
+    } else {
+      rlDisableBackfaceCulling(); // optional, shows hidden edges
+      rlEnableWireMode();
+      DrawModel(terrainModel, Vector3Zero(), 1.0f, WHITE);
+      rlDisableWireMode();
+      rlEnableBackfaceCulling();
+    }
 
     shipModel.transform = MatrixMultiply(shipRotationMatrix, MatrixTranslate(shipPosition.x, shipPosition.y, shipPosition.z));
     DrawModel(shipModel, Vector3Zero(), 1.0f, WHITE); // WHITE tint will respect the MAROON material color.
