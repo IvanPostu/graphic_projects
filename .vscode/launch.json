@@ -37,6 +37,15 @@
             "args": [],
             "cwd": "${workspaceFolder}/p18_minecraft_cpp/build",
             "stopOnEntry": false
+        },
+        {
+            "name": "Debug 'p21'",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/p21_terrain/bin/demo20",
+            "args": [],
+            "cwd": "${workspaceFolder}/p21_terrain/bin",
+            "stopOnEntry": false
         }
     ]
 }
