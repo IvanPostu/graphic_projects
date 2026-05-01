@@ -26,7 +26,31 @@ int main(void) {
 
   // Enable mouse look
   DisableCursor();
-  ShowCursor();
+  // ShowCursor();
+
+  Image heightmap = GenImageColor(256, 256, BLACK);
+
+  // Generate procedural heightmap
+  for (int y = 0; y < heightmap.height; y++) {
+    for (int x = 0; x < heightmap.width; x++) {
+      float fx = (float)x / heightmap.width;
+      float fy = (float)y / heightmap.height;
+
+      float h =
+          sinf(fx * 10.0f) * 0.5f +
+          cosf(fy * 10.0f) * 0.5f;
+
+      unsigned char value = (unsigned char)((h + 1.0f) * 0.5f * 255);
+
+      ImageDrawPixel(&heightmap, x, y, (Color){value, value, value, 255});
+    }
+  }
+
+  Mesh mesh = GenMeshHeightmap(heightmap, (Vector3){50, 10, 50});
+  Model model = LoadModelFromMesh(mesh);
+
+  Texture2D texture = LoadTextureFromImage(heightmap);
+  model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
 
   while (!WindowShouldClose()) {
     if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) {
@@ -40,10 +64,11 @@ int main(void) {
     ClearBackground(RAYWHITE);
 
     BeginMode3D(camera);
-
-    // Draw a simple grid (size, spacing)
-    DrawGrid(20, 1.0f);
-
+    {
+      DrawModel(model, (Vector3){-25, 0, -25}, 1.0f, WHITE);
+      // Draw a simple grid (size, spacing)
+      DrawGrid(50, 1.0f);
+    }
     EndMode3D();
 
     DrawText("Use WASD to move, mouse to look", 10, 10, 20, DARKGRAY);
@@ -52,7 +77,10 @@ int main(void) {
     EndDrawing();
   }
 
-  // Close the game window and release all Raylib resources.
+  UnloadTexture(texture);
+  UnloadModel(model);
+  UnloadImage(heightmap);
+
   CloseWindow();
 
   return EXIT_SUCCESS;
