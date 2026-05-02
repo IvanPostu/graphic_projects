@@ -1,7 +1,10 @@
-#include <stdio.h>
-
 #include "raylib.h"
 #include "raymath.h"
+
+// Initialization
+//--------------------------------------------------------------------------------------
+const int SCREEN_WIDTH = 800;
+const int SCREEN_HEIGHT = 450;
 
 // Function to create a tiled texture by repeating an image X times
 Texture2D CreateTiledTexture(Texture2D sourceTexture, int tilesX, int tilesY) {
@@ -67,16 +70,16 @@ float GetHeightFromImage(Image image, Vector3 worldPos, Vector3 mapSize,
   return height;
 }
 
+static void HandleWindowScreenSize(void);
+
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
 int main(void) {
-  // Initialization
-  //--------------------------------------------------------------------------------------
-  const int screenWidth = 800;
-  const int screenHeight = 450;
 
-  InitWindow(screenWidth, screenHeight,
+  SetConfigFlags(FLAG_VSYNC_HINT);
+  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+  InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT,
              "raylib [models] example - heightmap loading and drawing");
   Quaternion characterRotate =
       QuaternionFromAxisAngle((Vector3){0.0f, 0.0f, 0.0f}, 0.0f);
@@ -86,9 +89,9 @@ int main(void) {
   camera.position = (Vector3){0.5f, 1.5f, -0.5f}; // Camera position
   camera.target = (Vector3){0.0f, 0.0f, 0.0f};    // Camera looking at point
   camera.up =
-      (Vector3){0.0f, 1.0f, 0.0f}; // Camera up vector (rotation towards target)
-  camera.fovy = 45.0f;             // Camera field-of-view Y
-  // camera.projection = CAMERA_PERSPECTIVE;                 // Camera
+      (Vector3){0.0f, 1.0f, 0.0f};        // Camera up vector (rotation towards target)
+  camera.fovy = 45.0f;                    // Camera field-of-view Y
+  camera.projection = CAMERA_PERSPECTIVE; // Camera
   // projection type
 
   Shader lightingShader = LoadShader("resources/shaders/glsl330/lighting.vs",
@@ -125,7 +128,7 @@ int main(void) {
 
   Vector3 mapSize = {16.0f, 8.0f, 16.0f}; // Define heightmap size (x, y, z)
   Mesh mesh = GenMeshHeightmap(
-      image, mapSize); // Generate heightmap mesh (RAM and VRAM)
+      image, mapSize);                   // Generate heightmap mesh (RAM and VRAM)
   Model model = LoadModelFromMesh(mesh); // Load model from generated mesh
 
   SetMaterialTexture(&model.materials[0], MATERIAL_MAP_DIFFUSE,
@@ -139,10 +142,6 @@ int main(void) {
   Vector3 walkingPointPosition = {0.0f, 1.0f, 2.0f};
   Vector3 walkingPointIntentPosition = {0.0f, 1.0f, 2.0f};
 
-  SetTargetFPS(60); // Set our game to run at 60 frames-per-second
-  //--------------------------------------------------------------------------------------
-
-  // Setup default sun lighting (directional light)
   Vector3 sunDirection = Vector3Normalize(
       (Vector3){0.3f, -1.0f, 0.4f});         // Sun coming from upper right
   Vector3 sunColor = {1.0f, 0.95f, 0.8f};    // Warm sunlight color
@@ -161,18 +160,22 @@ int main(void) {
                  SHADER_UNIFORM_VEC3);
 
   float characterRotationAngle =
-      0.0f; // Add this variable to track rotation angle
+      0.0f;                                           // Add this variable to track rotation angle
   Vector3 characterRotationAxis = {0.0f, 1.0f, 0.0f}; // Y-axis rotation
 
   // Main game loop
   while (!WindowShouldClose()) // Detect window close button or ESC key
   {
+    if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) {
+      HandleWindowScreenSize();
+    }
+
     // Update
     //----------------------------------------------------------------------------------
     // UpdateCamera(&camera, CAMERA_ORBITAL);
     camera.position.x = walkingPointPosition.x;
-    // camera.position.y = walkingPointPosition.y + 1.5f;
-    camera.position.z = walkingPointPosition.z + 2.0f;
+    camera.position.y = walkingPointPosition.y + 1.5f;
+    camera.position.z = walkingPointPosition.z + 1.50f;
     camera.target.x = walkingPointPosition.x;
     camera.target.y = walkingPointPosition.y;
     camera.target.z = walkingPointPosition.z;
@@ -267,13 +270,24 @@ int main(void) {
     DrawModelEx(houseModel, housePosition, characterRotationAxis, 0.0f,
                 (Vector3){0.05f, 0.05f, 0.05f}, WHITE);
 
+    DrawLine3D((Vector3){0, 0, 0}, (Vector3){9999, 0, 0}, RED);   // X-axis (Red)
+    DrawLine3D((Vector3){0, 0, 0}, (Vector3){0, 9999, 0}, GREEN); // Y-axis (Green)
+    DrawLine3D((Vector3){0, 0, 0}, (Vector3){0, 0, 9999}, BLUE);  // Z-axis (Blue)
     EndMode3D();
 
-    // DrawTexture(texture, screenWidth - texture.width - 20, 20, WHITE);
-    // DrawRectangleLines(screenWidth - texture.width - 20, 20, texture.width,
-    // texture.height, GREEN);
+    // DrawFPS(10, 10);
 
-    DrawFPS(10, 10);
+    DrawRectangle(10, 5, 195, 120, Fade(SKYBLUE, 0.5f));
+    DrawRectangleLines(10, 5, 195, 120, BLUE);
+
+    DrawText("Camera status:", 20, 15, 10, BLACK);
+    DrawText(TextFormat("- Projection: %s", (camera.projection == CAMERA_PERSPECTIVE) ? "PERSPECTIVE" : (camera.projection == CAMERA_ORTHOGRAPHIC) ? "ORTHOGRAPHIC"
+                                                                                                                                                   : "CUSTOM"),
+             20, 45, 10, BLACK);
+    DrawText(TextFormat("- Position: (%06.3f, %06.3f, %06.3f)", camera.position.x, camera.position.y, camera.position.z), 20, 60, 10, BLACK);
+    DrawText(TextFormat("- Target: (%06.3f, %06.3f, %06.3f)", camera.target.x, camera.target.y, camera.target.z), 20, 75, 10, BLACK);
+    DrawText(TextFormat("- Up: (%06.3f, %06.3f, %06.3f)", camera.up.x, camera.up.y, camera.up.z), 20, 90, 10, BLACK);
+    DrawText(TextFormat("%d FPS", GetFPS()), 20, 105, 10, DARKGRAY);
 
     EndDrawing();
     //----------------------------------------------------------------------------------
@@ -282,7 +296,7 @@ int main(void) {
   // De-Initialization
   //--------------------------------------------------------------------------------------
   UnloadImage(
-      image); // Unload heightmap image from RAM, already uploaded to VRAM
+      image);                         // Unload heightmap image from RAM, already uploaded to VRAM
   UnloadTexture(texture);             // Unload texture
   UnloadTexture(tiledTerrainTexture); // Unload tiled terrain texture
   UnloadModel(model);                 // Unload model
@@ -292,4 +306,19 @@ int main(void) {
   //--------------------------------------------------------------------------------------
 
   return 0;
+}
+
+static void HandleWindowScreenSize(void) {
+  const int monitorIndex = GetCurrentMonitor();
+  const bool isFullscreen = IsWindowFullscreen();
+  const int monitorPosX = GetMonitorPosition(monitorIndex).x;
+  const int monitorPosY = GetMonitorPosition(monitorIndex).y;
+
+  if (isFullscreen) {
+    SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+  } else {
+    SetWindowState(FLAG_WINDOW_UNDECORATED);
+    SetWindowSize(GetMonitorWidth(monitorIndex), GetMonitorHeight(monitorIndex));
+    SetWindowPosition(monitorPosX, monitorPosY);
+  }
 }
