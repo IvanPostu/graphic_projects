@@ -21,6 +21,9 @@ int main(void) {
   const int screenHeight = 450;
 
   SetConfigFlags(FLAG_MSAA_4X_HINT);
+  SetConfigFlags(FLAG_VSYNC_HINT);
+  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+
   InitWindow(screenWidth, screenHeight, "Raylib collision demo");
   SetWindowState(FLAG_WINDOW_RESIZABLE);
   MaximizeWindow();
@@ -38,8 +41,6 @@ int main(void) {
   // Physics values
   float DampeningValue = 0.24f;
   float Gravity = 9.7f;
-  // Set the fps
-  SetTargetFPS(-1);
   // Load in the shader
   Shader shader = LoadShader(TextFormat("resources/shaders/shader.vs", GLSL_VERSION),
                              TextFormat("resources/shaders/shader.fs", GLSL_VERSION));
@@ -104,7 +105,7 @@ int main(void) {
     UpdateCamera(&camera, CAMERA_FIRST_PERSON);
 
     // Toggle debug
-    if (IsKeyPressed(KEY_F3)) {
+    if (IsKeyPressed(KEY_P)) {
       showDebug = !showDebug;
     }
 
