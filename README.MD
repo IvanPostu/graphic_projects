@@ -140,6 +140,8 @@ cp target/release/cfgen misc/
   - <img style="width: 450px" src="./p29_shaders_base_lighting/image.png" />
 - p29 shader pbr lighting
   - <img style="width: 450px" src="./p30_shaders_basic_pbr_lighting/image.png" />
+- p29 shader pbr lighting
+  - <img style="width: 450px" src="./p30_shaders_basic_pbr_lighting/image.png" />
 
 ## References
 
