@@ -5,7 +5,8 @@
 // #else // PLATFORM_ANDROID, PLATFORM_WEB
 // #define GLSL_VERSION 100
 // #endif
-#define GLSL_VERSION 100
+// #define GLSL_VERSION 100
+#define GLSL_VERSION 330
 
 #include <stdlib.h> // Required for: NULL
 
@@ -134,10 +135,10 @@ int main(void) {
 
   // Load floor model mesh and assign material parameters
   // NOTE: A basic plane shape can be generated instead of being loaded from a model file
-  Model floor = LoadModel("resources/models/plane.glb");
-  // Mesh floorMesh = GenMeshPlane(10, 10, 10, 10);
-  // GenMeshTangents(&floorMesh);      // TODO: Review tangents generation
-  // Model floor = LoadModelFromMesh(floorMesh);
+  // Model floor = LoadModel("resources/models/plane.glb");
+  Mesh floorMesh = GenMeshPlane(10, 10, 10, 10);
+  GenMeshTangents(&floorMesh);      // TODO: Review tangents generation
+  Model floor = LoadModelFromMesh(floorMesh);
 
   // Assign material shader for our floor model, same PBR shader
   floor.materials[0].shader = shader;
