@@ -92,7 +92,6 @@ int main(void) {
       (Vector3){0.0f, 1.0f, 0.0f};        // Camera up vector (rotation towards target)
   camera.fovy = 45.0f;                    // Camera field-of-view Y
   camera.projection = CAMERA_PERSPECTIVE; // Camera
-  // projection type
 
   Shader lightingShader = LoadShader("resources/shaders/glsl330/lighting.vs",
                                      "resources/shaders/glsl330/lighting.fs");
@@ -170,9 +169,6 @@ int main(void) {
       HandleWindowScreenSize();
     }
 
-    // Update
-    //----------------------------------------------------------------------------------
-    // UpdateCamera(&camera, CAMERA_ORBITAL);
     camera.position.x = walkingPointPosition.x;
     camera.position.y = walkingPointPosition.y + 1.5f;
     camera.position.z = walkingPointPosition.z + 1.50f;
