@@ -156,6 +156,8 @@ cp target/release/cfgen misc/
   - <img style="width: 450px" src="./p32_textures_fog_of_war/image.png" />
 - p33
   - <img style="width: 450px" src="./p33_textures_framebuffer_rendering/image.png" />
+- p34
+  - <img style="width: 450px" src="./p34_shapes_top_down_lights/image.png" />
 
 ## References
 
