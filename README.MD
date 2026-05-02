@@ -150,6 +150,12 @@ cp target/release/cfgen misc/
   - <img style="width: 450px" src="./p30_shaders_basic_pbr_lighting/image.png" />
 - p30 shader pbr lighting
   - <img style="width: 450px" src="./p30_shaders_basic_pbr_lighting/image2.png" />
+- p31
+  - <img style="width: 450px" src="./p31_textures_particles_blending/image.png" />
+- p32
+  - <img style="width: 450px" src="./p32_textures_fog_of_war/image.png" />
+- p33
+  - <img style="width: 450px" src="./p33_textures_framebuffer_rendering/image.png" />
 
 ## References
 
