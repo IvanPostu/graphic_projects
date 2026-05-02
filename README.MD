@@ -138,10 +138,10 @@ cp target/release/cfgen misc/
   - <img style="width: 450px" src="./p28_core_3d_camera_fps/image.png" />
 - p29 shader base lighting
   - <img style="width: 450px" src="./p29_shaders_base_lighting/image.png" />
-- p29 shader pbr lighting
+- p30 shader pbr lighting
   - <img style="width: 450px" src="./p30_shaders_basic_pbr_lighting/image.png" />
-- p29 shader pbr lighting
-  - <img style="width: 450px" src="./p30_shaders_basic_pbr_lighting/image.png" />
+- p30 shader pbr lighting
+  - <img style="width: 450px" src="./p30_shaders_basic_pbr_lighting/image2.png" />
 
 ## References
 
