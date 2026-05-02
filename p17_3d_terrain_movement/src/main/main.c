@@ -1,74 +1,18 @@
 #include "raylib.h"
 #include "raymath.h"
 
-// Initialization
-//--------------------------------------------------------------------------------------
+typedef enum { ATTACHED_TO_CHARACTER,
+               FREE } CameraState;
+
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 450;
 
 // Function to create a tiled texture by repeating an image X times
-Texture2D CreateTiledTexture(Texture2D sourceTexture, int tilesX, int tilesY) {
-  // Get the source image from the texture
-  Image sourceImage = LoadImageFromTexture(sourceTexture);
-
-  // Calculate new dimensions
-  int newWidth = sourceImage.width * tilesX;
-  int newHeight = sourceImage.height * tilesY;
-
-  // Create a new image with the tiled dimensions
-  Image tiledImage = GenImageColor(newWidth, newHeight, WHITE);
-
-  // Tile the source image across the new image
-  for (int y = 0; y < tilesY; y++) {
-    for (int x = 0; x < tilesX; x++) {
-      Rectangle destRec = {x * sourceImage.width, y * sourceImage.height,
-                           sourceImage.width, sourceImage.height};
-      ImageDraw(&tiledImage, sourceImage,
-                (Rectangle){0, 0, sourceImage.width, sourceImage.height},
-                destRec, WHITE);
-    }
-  }
-
-  // Create texture from the tiled image
-  Texture2D tiledTexture = LoadTextureFromImage(tiledImage);
-
-  // Clean up temporary images
-  UnloadImage(sourceImage);
-  UnloadImage(tiledImage);
-
-  return tiledTexture;
-}
+Texture2D CreateTiledTexture(Texture2D sourceTexture, int tilesX, int tilesY);
 
 // Function to get height from image at a specific world position
 float GetHeightFromImage(Image image, Vector3 worldPos, Vector3 mapSize,
-                         Vector3 mapPos) {
-  // Convert world coordinates to image coordinates
-  float u = (worldPos.x - mapPos.x) / mapSize.x; // Normalize x to [0, 1]
-  float v = (worldPos.z - mapPos.z) / mapSize.z; // Normalize z to [0, 1]
-
-  // Ensure u, v are within [0, 1]
-  if (u < 0.0f || u > 1.0f || v < 0.0f || v > 1.0f)
-    return 0.0f;
-
-  // Map to image pixel coordinates
-  int pixelX = (int)(u * image.width);
-  int pixelY = (int)(v * image.height);
-
-  // Get pixel color (grayscale height value)
-  Color pixel = GetImageColor(image, pixelX, pixelY);
-
-  // Debug purposes
-  // printf(">>>>>>>>> %i %i\n", pixelX, pixelY);
-
-  // Convert grayscale value (0-255) to height (assuming grayscale image)
-  // Scale it to match the heightmap mesh's y-scale (8.0f in GenMeshHeightmap)
-  float height = (pixel.r / 255.0f) * mapSize.y;
-
-  // Debug purposes
-  // printf(">>>>>>>>>> %i\n", height);
-
-  return height;
-}
+                         Vector3 mapPos);
 
 static void HandleWindowScreenSize(void);
 
@@ -162,19 +106,35 @@ int main(void) {
       0.0f;                                           // Add this variable to track rotation angle
   Vector3 characterRotationAxis = {0.0f, 1.0f, 0.0f}; // Y-axis rotation
 
+  CameraState cameraState = ATTACHED_TO_CHARACTER;
+
   // Main game loop
   while (!WindowShouldClose()) // Detect window close button or ESC key
   {
     if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) {
       HandleWindowScreenSize();
     }
+    if (IsKeyPressed(KEY_P)) {
+      cameraState = cameraState == ATTACHED_TO_CHARACTER ? FREE : ATTACHED_TO_CHARACTER;
+      if (cameraState == ATTACHED_TO_CHARACTER) {
+        EnableCursor();
+      }
+      if (cameraState == FREE) {
+        DisableCursor();
+      }
+    }
 
-    camera.position.x = walkingPointPosition.x;
-    camera.position.y = walkingPointPosition.y + 1.5f;
-    camera.position.z = walkingPointPosition.z + 1.50f;
-    camera.target.x = walkingPointPosition.x;
-    camera.target.y = walkingPointPosition.y;
-    camera.target.z = walkingPointPosition.z;
+    if (cameraState == ATTACHED_TO_CHARACTER) {
+      camera.position.x = walkingPointPosition.x;
+      camera.position.y = walkingPointPosition.y + 1.5f;
+      camera.position.z = walkingPointPosition.z + 1.50f;
+      camera.target.x = walkingPointPosition.x;
+      camera.target.y = walkingPointPosition.y;
+      camera.target.z = walkingPointPosition.z;
+    } else if (cameraState == FREE) {
+      UpdateCamera(&camera, CAMERA_FREE);
+    }
+
     walkingPointPosition.y =
         GetHeightFromImage(image, walkingPointPosition, mapSize, mapPosition) +
         0.05f;
@@ -317,4 +277,68 @@ static void HandleWindowScreenSize(void) {
     SetWindowSize(GetMonitorWidth(monitorIndex), GetMonitorHeight(monitorIndex));
     SetWindowPosition(monitorPosX, monitorPosY);
   }
+}
+
+// Function to get height from image at a specific world position
+float GetHeightFromImage(Image image, Vector3 worldPos, Vector3 mapSize,
+                         Vector3 mapPos) {
+  // Convert world coordinates to image coordinates
+  float u = (worldPos.x - mapPos.x) / mapSize.x; // Normalize x to [0, 1]
+  float v = (worldPos.z - mapPos.z) / mapSize.z; // Normalize z to [0, 1]
+
+  // Ensure u, v are within [0, 1]
+  if (u < 0.0f || u > 1.0f || v < 0.0f || v > 1.0f)
+    return 0.0f;
+
+  // Map to image pixel coordinates
+  int pixelX = (int)(u * image.width);
+  int pixelY = (int)(v * image.height);
+
+  // Get pixel color (grayscale height value)
+  Color pixel = GetImageColor(image, pixelX, pixelY);
+
+  // Debug purposes
+  // printf(">>>>>>>>> %i %i\n", pixelX, pixelY);
+
+  // Convert grayscale value (0-255) to height (assuming grayscale image)
+  // Scale it to match the heightmap mesh's y-scale (8.0f in GenMeshHeightmap)
+  float height = (pixel.r / 255.0f) * mapSize.y;
+
+  // Debug purposes
+  // printf(">>>>>>>>>> %i\n", height);
+
+  return height;
+}
+
+// Function to create a tiled texture by repeating an image X times
+Texture2D CreateTiledTexture(Texture2D sourceTexture, int tilesX, int tilesY) {
+  // Get the source image from the texture
+  Image sourceImage = LoadImageFromTexture(sourceTexture);
+
+  // Calculate new dimensions
+  int newWidth = sourceImage.width * tilesX;
+  int newHeight = sourceImage.height * tilesY;
+
+  // Create a new image with the tiled dimensions
+  Image tiledImage = GenImageColor(newWidth, newHeight, WHITE);
+
+  // Tile the source image across the new image
+  for (int y = 0; y < tilesY; y++) {
+    for (int x = 0; x < tilesX; x++) {
+      Rectangle destRec = {x * sourceImage.width, y * sourceImage.height,
+                           sourceImage.width, sourceImage.height};
+      ImageDraw(&tiledImage, sourceImage,
+                (Rectangle){0, 0, sourceImage.width, sourceImage.height},
+                destRec, WHITE);
+    }
+  }
+
+  // Create texture from the tiled image
+  Texture2D tiledTexture = LoadTextureFromImage(tiledImage);
+
+  // Clean up temporary images
+  UnloadImage(sourceImage);
+  UnloadImage(tiledImage);
+
+  return tiledTexture;
 }
