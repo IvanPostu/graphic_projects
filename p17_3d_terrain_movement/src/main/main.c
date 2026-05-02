@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "rlgl.h"
 #include "raymath.h"
 
 typedef enum { ATTACHED_TO_CHARACTER,
@@ -69,10 +70,9 @@ int main(void) {
   UnloadTexture(
       terrainTexture01); // Unload original since we're using the tiled version
 
-  Vector3 mapSize = {16.0f, 8.0f, 16.0f}; // Define heightmap size (x, y, z)
-  Mesh mesh = GenMeshHeightmap(
-      image, mapSize);                   // Generate heightmap mesh (RAM and VRAM)
-  Model model = LoadModelFromMesh(mesh); // Load model from generated mesh
+  Vector3 mapSize = {16.0f, 8.0f, 16.0f};       // Define heightmap size (x, y, z)
+  Mesh mesh = GenMeshHeightmap(image, mapSize); // Generate heightmap mesh (RAM and VRAM)
+  Model model = LoadModelFromMesh(mesh);        // Load model from generated mesh
 
   SetMaterialTexture(&model.materials[0], MATERIAL_MAP_DIFFUSE,
                      tiledTerrainTexture);
@@ -107,12 +107,16 @@ int main(void) {
   Vector3 characterRotationAxis = {0.0f, 1.0f, 0.0f}; // Y-axis rotation
 
   CameraState cameraState = ATTACHED_TO_CHARACTER;
+  bool terrainBackfaceCoolingEnabled = true;
 
   // Main game loop
   while (!WindowShouldClose()) // Detect window close button or ESC key
   {
     if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) {
       HandleWindowScreenSize();
+    }
+    if (IsKeyPressed(KEY_Q)) {
+      terrainBackfaceCoolingEnabled = !terrainBackfaceCoolingEnabled;
     }
     if (IsKeyPressed(KEY_P)) {
       cameraState = cameraState == ATTACHED_TO_CHARACTER ? FREE : ATTACHED_TO_CHARACTER;
@@ -206,7 +210,15 @@ int main(void) {
 
     BeginMode3D(camera);
 
-    DrawModel(model, mapPosition, 1.0f, WHITE);
+    if (terrainBackfaceCoolingEnabled) {
+      DrawModel(model, mapPosition, 1.0f, WHITE);
+    } else {
+      rlDisableBackfaceCulling(); // optional, shows hidden edges
+      rlEnableWireMode();
+      DrawModel(model, mapPosition, 1.0f, WHITE);
+      rlDisableWireMode();
+      rlEnableBackfaceCulling();
+    }
 
     // DrawGrid(20, 1.0f);
 
