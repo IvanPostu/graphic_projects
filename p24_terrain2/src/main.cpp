@@ -122,6 +122,12 @@ int main(void) {
     ClearBackground(SKYBLUE); // A nice sky blue color
     BeginMode3D(camera);
 
+    Matrix projection = rlGetMatrixProjection();
+    Matrix view = rlGetMatrixModelview(); // this actually includes view
+    Matrix gVP = MatrixMultiply(projection, view);
+    int loc = GetShaderLocation(shader, "gVP");
+    SetShaderValueMatrix(shader, loc, gVP);
+
     // DrawModelWires(terrainModel, Vector3Zero(), 1.0f, LIME); // Draw terrain wireframe
 
     if (terrainBackfaceCoolingEnabled) {
