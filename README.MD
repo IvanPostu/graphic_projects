@@ -128,6 +128,14 @@ cp target/release/cfgen misc/
   - <img style="width: 450px" src="./p18_minecraft_cpp/image.png" />
 - p19 - game example (see reference)
   - <img style="width: 450px" src="./p19_game1/image.png" />
+- p20
+  - <img style="width: 450px" src="./p20_spaceship_flight/image.png" />
+- p21
+  - <img style="width: 450px" src="./p21_terrain_raylib_image_mesh_model/image.png" />
+- p22
+  - <img style="width: 450px" src="./p22_terrain_2d_arr_vec3/image.png" />
+- p25
+  - <img style="width: 450px" src="./p25_model_collision/image.png" />
 - tower-blocks -  (see references)
   - <img style="width: 450px" src="./tower-blocks/image.png" />
 - p26
