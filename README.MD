@@ -130,6 +130,12 @@ cp target/release/cfgen misc/
   - <img style="width: 450px" src="./p19_game1/image.png" />
 - tower-blocks -  (see references)
   - <img style="width: 450px" src="./tower-blocks/image.png" />
+- p26
+  - <img style="width: 450px" src="./p26_text_on_top_of_model/image.png" />
+- p27 - camera FPS
+  - <img style="width: 450px" src="./p27_core_3d_camera_fps/image.png" />
+- p28 FPS
+  - <img style="width: 450px" src="./p28_core_3d_camera_fps/image.png" />
 
 ## References
 
